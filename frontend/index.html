@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShipShare Kenya - Save Money Shipping Together</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--dark);
+            background-color: #f1f5f9;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+        }
+
+        .kenya-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #f59e0b 100%);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .step-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-bar {
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            transition: width 0.3s ease;
+        }
+
+        .shipment-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-confirmed {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-shipped {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-delivered {
+            background-color: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .dark-mode {
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        .dark-mode .bg-white {
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
+        }
+
+        .dark-mode .text-gray-700 {
+            color: #e2e8f0 !important;
+        }
+
+        .dark-mode .text-gray-500 {
+            color: #94a3b8 !important;
+        }
+
+        .dark-mode .border-gray-200 {
+            border-color: #334155 !important;
+        }
+
+        .dark-mode .bg-gray-100 {
+            background-color: #1e293b !important;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.7;
+            animation: blob 7s infinite;
+        }
+
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+
+        .blob-delay-2000 {
+            animation-delay: 2s;
+        }
+
+        .blob-delay-4000 {
+            animation-delay: 4s;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen" x-data="shipShareApp()">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo and Nav Links -->
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center cursor-pointer" @click="showPage('landing')">
+                        <i class="fas fa-boxes text-blue-500 text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-gray-900">ShipShare</span>
+                        <span class="ml-2 text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full font-medium">Kenya</span>
+                    </div>
+                    <div class="hidden sm:ml-8 sm:flex sm:space-x-6" x-show="!currentPage.includes('dashboard')">
+                        <a href="#" @click="showPage('about')" class="text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-sm font-medium">About Us</a>
+                        <a href="#" @click="showPage('how')" class="text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-sm font-medium">How it works</a>
+                        <a href="#" @click="showPage('testimonials')" class="text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-sm font-medium">Testimonials</a>
+                        <a href="#" @click="showPage('browse')" class="text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-sm font-medium">Browse Groups</a>
+                    </div>
+                </div>
+                
+                <!-- Right side buttons -->
+                <div class="flex items-center space-x-4">
+                    <button @click="toggleDarkMode" class="p-2 rounded-full text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <i class="fas" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+                    </button>
+                    
+                    <template x-if="!user">
+                        <div class="hidden sm:flex items-center space-x-3">
+                            <button @click="showPage('login')" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Sign In
+                            </button>
+                            <button @click="showPage('signup')" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Sign Up
+                            </button>
+                        </div>
+                        
+                        <!-- Mobile buttons -->
+                        <div class="sm:hidden">
+                            <button @click="showPage('login')" class="inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                Sign In
+                            </button>
+                        </div>
+                    </template>
+                    
+                    <template x-if="user">
+                        <div class="flex items-center space-x-3">
+                            <span class="hidden sm:block text-sm text-gray-700">Welcome, <span x-text="user.name"></span></span>
+                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                <span class="text-blue-600 font-semibold text-sm" x-text="user.name.charAt(0)"></span>
+                            </div>
+                            <button @click="logout" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
+                    </template>
+                    
+                    <!-- Mobile menu button -->
+                    <div class="sm:hidden">
+                        <button @click="mobileMenuOpen = !mobileMenuOpen" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
+                            <i class="fas" :class="mobileMenuOpen ? 'fa-times' : 'fa-bars'"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div x-show="mobileMenuOpen" class="sm:hidden bg-white shadow-md">
+            <div class="pt-2 pb-3 space-y-1">
+                <a href="#" @click="showPage('about'); mobileMenuOpen = false" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">About Us</a>
+                <a href="#" @click="showPage('how'); mobileMenuOpen = false" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">How it works</a>
+                <a href="#" @click="showPage('testimonials'); mobileMenuOpen = false" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Testimonials</a>
+                <a href="#" @click="showPage('browse'); mobileMenuOpen = false" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Browse Groups</a>
+                <div class="pt-4 pb-3 border-t border-gray-200">
+                    <div class="flex items-center px-4">
+                        <button @click="toggleDarkMode" class="p-2 rounded-full text-gray-500 hover:text-gray-700 focus:outline-none">
+                            <i class="fas" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+                        </button>
+                        <template x-if="!user">
+                            <button @click="showPage('login'); mobileMenuOpen = false" class="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                Sign In
+                            </button>
+                        </template>
+                    </div>
+                    <div class="mt-3 space-y-1">
+                        <button @click="showPage('signup'); mobileMenuOpen = false" class="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">Sign Up</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <main>
+        <!-- Landing Page -->
+        <div x-show="currentPage === 'landing'" class="page">
+            <!-- Hero Section -->
+            <section class="hero-gradient text-white relative overflow-hidden">
+                <div class="blob w-32 h-32 bg-blue-300 top-10 left-10"></div>
+                <div class="blob w-40 h-40 bg-green-300 top-20 right-20 blob-delay-2000"></div>
+                <div class="blob w-36 h-36 bg-amber-300 bottom-10 left-1/2 blob-delay-4000"></div>
+                
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 relative z-10">
+                    <div class="md:flex md:items-center md:justify-between">
+                        <div class="md:w-1/2 mb-10 md:mb-0">
+                            <div class="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
+                                <span class="flex h-2 w-2 rounded-full bg-green-400 animate-pulse mr-2"></span>
+                                Now serving Nairobi, Mombasa, Kisumu & more
+                            </div>
+                            <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">Save money by shipping together</h1>
+                            <p class="text-xl mb-8 opacity-90">ShipShare Kenya connects you with neighbors shipping to the same area, so you can share costs and reduce your shipping expenses by up to 70%.</p>
+                            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                                <button @click="showPage('signup')" class="px-8 py-3 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100 transition duration-300">Get Started</button>
+                                <button @click="document.querySelector('#how-it-works').scrollIntoView({ behavior: 'smooth' })" class="px-8 py-3 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-blue-600 transition duration-300">Learn More</button>
+                            </div>
+                            
+                            <!-- Stats -->
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold">KES 2.5M+</div>
+                                    <div class="text-sm opacity-80">Saved by users</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold">15K+</div>
+                                    <div class="text-sm opacity-80">Active users</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold">50K+</div>
+                                    <div class="text-sm opacity-80">Shipments grouped</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold">4.9/5</div>
+                                    <div class="text-sm opacity-80">User rating</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 flex justify-center">
+                            <div class="relative w-full max-w-md">
+                                <div class="relative bg-white rounded-xl shadow-2xl overflow-hidden">
+                                    <div class="p-6">
+                                        <div class="flex items-center mb-4">
+                                            <div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                                            <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                        </div>
+                                        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                                            <div class="flex items-center mb-3">
+                                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                                    <i class="fas fa-box text-blue-500"></i>
+                                                </div>
+                                                <div>
+                                                    <h3 class="font-bold text-gray-800">Nairobi → Mombasa</h3>
+                                                    <p class="text-sm text-gray-600">3 participants • KES 2,400 savings</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex justify-between text-sm">
+                                                <div>
+                                                    <p class="text-gray-500">From</p>
+                                                    <p class="font-medium">Nairobi CBD</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-gray-500">To</p>
+                                                    <p class="font-medium">Mombasa Island</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-gray-500">Date</p>
+                                                    <p class="font-medium">Tomorrow</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <div class="flex items-center mb-3">
+                                                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                                    <i class="fas fa-boxes text-green-500"></i>
+                                                </div>
+                                                <div>
+                                                    <h3 class="font-bold text-gray-800">Westlands → Kisumu</h3>
+                                                    <p class="text-sm text-gray-600">5 participants • KES 3,200 savings</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex justify-between text-sm">
+                                                <div>
+                                                    <p class="text-gray-500">Status</p>
+                                                    <p class="font-medium text-green-500">Confirmed</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-gray-500">Pickup</p>
+                                                    <p class="font-medium">Today 5PM</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How It Works Section -->
+            <section id="how-it-works" class="py-20 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-4">How ShipShare Kenya Works</h2>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">Save money on shipping in just three simple steps</p>
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-10">
+                        <div class="text-center">
+                            <div class="step-circle bg-blue-100 text-blue-600 mx-auto">1</div>
+                            <h3 class="text-xl font-bold mb-3">Create Your Shipment</h3>
+                            <p class="text-gray-600">Enter your package details and destination. We'll calculate your estimated savings in KES.</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="step-circle bg-green-100 text-green-600 mx-auto">2</div>
+                            <h3 class="text-xl font-bold mb-3">Find Matches</h3>
+                            <p class="text-gray-600">We'll show you nearby shipments heading to similar destinations across Kenya.</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="step-circle bg-amber-100 text-amber-600 mx-auto">3</div>
+                            <h3 class="text-xl font-bold mb-3">Ship Together & Save</h3>
+                            <p class="text-gray-600">Join a group and split the shipping costs. Everyone saves money!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Popular Routes -->
+            <section class="py-20 bg-gray-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-4">Popular Routes Today</h2>
+                        <p class="text-xl text-gray-600">Join existing groups and ship today</p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <template x-for="group in mockGroups" :key="group.id">
+                            <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <div class="flex items-center text-sm text-gray-500 mb-1">
+                                            <i class="fas fa-map-marker-alt mr-2"></i>
+                                            <span x-text="group.origin"></span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-arrow-down text-blue-500 mr-2"></i>
+                                            <span class="font-bold text-gray-900" x-text="group.destination"></span>
+                                        </div>
+                                    </div>
+                                    <span class="shipment-status" :class="group.status === 'closing' ? 'status-pending' : 'status-confirmed'" x-text="group.status === 'closing' ? 'Closing Soon' : 'Open'"></span>
+                                </div>
+                                
+                                <div class="space-y-3 mb-6">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Spots left</span>
+                                        <span class="font-medium text-gray-900" x-text="`${group.maxParticipants - group.participants} of ${group.maxParticipants}`"></span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Total weight</span>
+                                        <span class="font-medium text-gray-900" x-text="group.totalWeight"></span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Closes in</span>
+                                        <span class="font-medium text-amber-600" x-text="group.deadline"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="pt-4 border-t border-gray-200 flex justify-between items-center">
+                                    <div>
+                                        <div class="text-xs text-gray-500">You save</div>
+                                        <div class="text-lg font-bold text-green-600" x-text="group.savings"></div>
+                                    </div>
+                                    <button @click="showPage('signup')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300">Join Group</button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    <div class="text-center mt-12">
+                        <button @click="showPage('browse')" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300">View All Routes</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Testimonials -->
+            <section id="testimonials" class="py-20 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-4">What Kenyans Are Saying</h2>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">Join thousands of happy customers saving on shipping</p>
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="bg-gray-50 p-8 rounded-xl">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                                    <span class="text-blue-500 font-bold">WM</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Wanjiku M.</h4>
+                                    <p class="text-gray-500 text-sm">Small Business Owner • Nairobi</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-700 mb-4">"ShipShare has cut my shipping costs by half! I send stock to Mombasa weekly and the group shipping feature is a game changer for my business."</p>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-8 rounded-xl">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4">
+                                    <span class="text-green-500 font-bold">OJ</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Ochieng J.</h4>
+                                    <p class="text-gray-500 text-sm">Online Seller • Kisumu</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-700 mb-4">"Finally, a platform that understands local logistics. The cost savings are real - from KES 3,000 to KES 1,200 per shipment!"</p>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-8 rounded-xl">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mr-4">
+                                    <span class="text-amber-500 font-bold">SK</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Sarah K.</h4>
+                                    <p class="text-gray-500 text-sm">Student • Nakuru</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-700 mb-4">"I use ShipShare to send care packages to my family. It's affordable and reliable. Love the real-time tracking feature!"</p>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section class="py-20 kenya-gradient text-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h2 class="text-3xl font-bold mb-6">Ready to Start Saving on Shipping?</h2>
+                    <p class="text-xl mb-8 max-w-3xl mx-auto">Join thousands of smart Kenyans who are already saving money with ShipShare.</p>
+                    <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                        <button @click="showPage('signup')" class="px-8 py-3 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100 transition duration-300">Sign Up Free</button>
+                        <button @click="document.querySelector('#how-it-works').scrollIntoView({ behavior: 'smooth' })" class="px-8 py-3 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-blue-600 transition duration-300">How It Works</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Login Page -->
+        <div x-show="currentPage === 'login'" class="page">
+            <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+                <div class="max-w-md w-full space-y-8">
+                    <div>
+                        <h2 class="mt-6 text-center text-3xl font-bold text-gray-900">Sign in to ShipShare Kenya</h2>
+                        <p class="mt-2 text-center text-sm text-gray-600">
+                            Or
+                            <a href="#" @click="showPage('signup')" class="font-medium text-blue-600 hover:text-blue-500"> create a new account</a>
+                        </p>
+                    </div>
+                    <form class="mt-8 space-y-6" @submit.prevent="login">
+                        <div class="rounded-md shadow-sm -space-y-px">
+                            <div>
+                                <label for="email" class="sr-only">Email address</label>
+                                <input id="email" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Email address">
+                            </div>
+                            <div>
+                                <label for="password" class="sr-only">Password</label>
+                                <input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Password">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="remember-me" class="ml-2 block text-sm text-gray-900">
+                                    Remember me
+                                </label>
+                            </div>
+
+                            <div class="text-sm">
+                                <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
+                                    Forgot your password?
+                                </a>
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Sign in
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signup Page -->
+        <div x-show="currentPage === 'signup'" class="page">
+            <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+                <div class="max-w-md w-full space-y-8">
+                    <div>
+                        <h2 class="mt-6 text-center text-3xl font-bold text-gray-900">Create your ShipShare Kenya account</h2>
+                        <p class="mt-2 text-center text-sm text-gray-600">
+                            Start saving on shipping today
+                        </p>
+                    </div>
+                    <form class="mt-8 space-y-6" @submit.prevent="signup">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700">Full name</label>
+                                <input id="name" name="name" type="text" required class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="John Kamau">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                                <input id="email" name="email" type="email" autocomplete="email" required class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="john@example.com">
+                            </div>
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                                <input id="password" name="password" type="password" required class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="••••••••">
+                            </div>
+                            <div>
+                                <label for="phone" class="block text-sm font-medium text-gray-700">Phone (Optional)</label>
+                                <input id="phone" name="phone" type="tel" class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="+254 7XX XXX XXX">
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Create account
+                            </button>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600">
+                                Already have an account?
+                                <a href="#" @click="showPage('login')" class="font-medium text-blue-600 hover:text-blue-500"> Sign in</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div x-show="currentPage === 'dashboard'" class="page">
+            <div class="min-h-screen bg-gray-50">
+                <div class="flex">
+                    <!-- Sidebar -->
+                    <div class="w-64 bg-white shadow-md min-h-screen">
+                        <div class="p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-6">Dashboard</h3>
+                            <nav class="space-y-2">
+                                <a href="#" @click="showPage('dashboard')" class="bg-blue-50 text-blue-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                    <i class="fas fa-tachometer-alt mr-3"></i>
+                                    Overview
+                                </a>
+                                <a href="#" @click="showPage('create')" class="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                    <i class="fas fa-plus-circle mr-3"></i>
+                                    Create Shipment
+                                </a>
+                                <a href="#" @click="showPage('browse')" class="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                    <i class="fas fa-users mr-3"></i>
+                                    Browse Groups
+                                </a>
+                                <a href="#" @click="showPage('shipments')" class="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                    <i class="fas fa-box mr-3"></i>
+                                    My Shipments
+                                </a>
+                                <a href="#" @click="showPage('profile')" class="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                    <i class="fas fa-user mr-3"></i>
+                                    My Profile
+                                </a>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="flex-1 p-8">
+                        <div class="mb-8">
+                            <h1 class="text-3xl font-bold text-gray-900">Welcome back, <span x-text="user?.name || 'User'"></span>!</h1>
+                            <p class="text-gray-600">Here's your shipping overview</p>
+                        </div>
+
+                        <!-- Stats Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <div class="flex items-center">
+                                    <div class="p-3 bg-blue-100 rounded-full">
+                                        <i class="fas fa-box text-blue-600"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-2xl font-bold text-gray-900">3</h3>
+                                        <p class="text-gray-500 text-sm">Active Shipments</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <div class="flex items-center">
+                                    <div class="p-3 bg-green-100 rounded-full">
+                                        <i class="fas fa-piggy-bank text-green-600"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-2xl font-bold text-gray-900">KES 8,400</h3>
+                                        <p class="text-gray-500 text-sm">Total Saved</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <div class="flex items-center">
+                                    <div class="p-3 bg-amber-100 rounded-full">
+                                        <i class="fas fa-users text-amber-600"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-2xl font-bold text-gray-900">12</h3>
+                                        <p class="text-gray-500 text-sm">Groups Joined</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <div class="flex items-center">
+                                    <div class="p-3 bg-purple-100 rounded-full">
+                                        <i class="fas fa-star text-purple-600"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-2xl font-bold text-gray-900">4.9</h3>
+                                        <p class="text-gray-500 text-sm">Your Rating</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="bg-white rounded-lg shadow p-6 mb-8">
+                            <h2 class="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <button @click="showPage('create')" class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition duration-300">
+                                    <i class="fas fa-plus-circle text-blue-500 text-2xl mb-2"></i>
+                                    <h3 class="font-semibold text-gray-900">Create New Shipment</h3>
+                                    <p class="text-sm text-gray-600">Start a new shipment and find group members</p>
+                                </button>
+                                <button @click="showPage('browse')" class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition duration-300">
+                                    <i class="fas fa-users text-green-500 text-2xl mb-2"></i>
+                                    <h3 class="font-semibold text-gray-900">Browse Groups</h3>
+                                    <p class="text-sm text-gray-600">Find existing groups to join</p>
+                                </button>
+                                <button @click="showPage('shipments')" class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-amber-500 hover:bg-amber-50 transition duration-300">
+                                    <i class="fas fa-box text-amber-500 text-2xl mb-2"></i>
+                                    <h3 class="font-semibold text-gray-900">View Shipments</h3>
+                                    <p class="text-sm text-gray-600">Track your active and completed shipments</p>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                            <i class="fas fa-check text-green-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Shipment Delivered</h4>
+                                            <p class="text-sm text-gray-600">Nairobi → Mombasa • KES 1,200 saved</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-sm text-gray-500">2 hours ago</span>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                            <i class="fas fa-users text-blue-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Joined Group</h4>
+                                            <p class="text-sm text-gray-600">Westlands → Kisumu • 4 participants</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-sm text-gray-500">1 day ago</span>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
+                                            <i class="fas fa-plus text-amber-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Created Shipment</h4>
+                                            <p class="text-sm text-gray-600">Nairobi CBD → Nakuru • 5kg package</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-sm text-gray-500">3 days ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Us Page -->
+        <div x-show="currentPage === 'about'" class="page">
+            <div class="min-h-screen bg-gray-50 py-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-4">About ShipShare Kenya</h1>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">Making shipping affordable for every Kenyan through smart group logistics</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-12 mb-16">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-6">Our Mission</h2>
+                            <p class="text-lg text-gray-700 mb-6">ShipShare Kenya was founded with a simple mission: to make shipping affordable and accessible for every Kenyan. We noticed that many individuals and small businesses were struggling with high shipping costs, especially when sending packages to different parts of the country.</p>
+                            <p class="text-lg text-gray-700 mb-6">By connecting people who are shipping to similar destinations, we help everyone save money while reducing the environmental impact of multiple separate deliveries.</p>
+                        </div>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
+                            <p class="text-lg text-gray-700 mb-6">Founded in 2023, ShipShare Kenya started as a small solution for Nairobi-based online sellers who wanted to reduce their shipping costs. Today, we've grown to serve thousands of customers across Kenya, from individuals sending care packages to small businesses managing their logistics.</p>
+                            <p class="text-lg text-gray-700">Our platform has helped Kenyans save over KES 2.5 million in shipping costs while building a community of smart shippers who understand the power of collaboration.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-8 mb-16">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Our Values</h2>
+                        <div class="grid md:grid-cols-3 gap-8">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-handshake text-blue-600 text-2xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">Collaboration</h3>
+                                <p class="text-gray-600">We believe in the power of working together to achieve common goals and reduce costs for everyone.</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-leaf text-green-600 text-2xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">Sustainability</h3>
+                                <p class="text-gray-600">By consolidating shipments, we help reduce the carbon footprint of logistics in Kenya.</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-shield-alt text-amber-600 text-2xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">Trust</h3>
+                                <p class="text-gray-600">We ensure every shipment is secure and every user can trust our platform with their packages.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-4">Join Our Community</h2>
+                        <p class="text-xl text-gray-600 mb-8">Be part of the thousands of Kenyans saving money on shipping every day.</p>
+                        <button @click="showPage('signup')" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300">Get Started Today</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works Page -->
+        <div x-show="currentPage === 'how'" class="page">
+            <div class="min-h-screen bg-gray-50 py-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-4">How ShipShare Kenya Works</h1>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">Save money on shipping in just three simple steps</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-10 mb-16">
+                        <div class="text-center">
+                            <div class="step-circle bg-blue-100 text-blue-600 mx-auto">1</div>
+                            <h3 class="text-xl font-bold mb-3">Create Your Shipment</h3>
+                            <p class="text-gray-600">Enter your package details, pickup location, and destination. We'll calculate your estimated savings in KES.</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="step-circle bg-green-100 text-green-600 mx-auto">2</div>
+                            <h3 class="text-xl font-bold mb-3">Find Matches</h3>
+                            <p class="text-gray-600">Our smart algorithm matches you with nearby shipments heading to similar destinations across Kenya.</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="step-circle bg-amber-100 text-amber-600 mx-auto">3</div>
+                            <h3 class="text-xl font-bold mb-3">Ship Together & Save</h3>
+                            <p class="text-gray-600">Join a group, split the shipping costs, and track your shipment in real-time. Everyone saves money!</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-8 mb-16">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Why Choose ShipShare?</h2>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="flex items-start">
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                    <i class="fas fa-piggy-bank text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Save Up to 70%</h3>
+                                    <p class="text-gray-600">Split shipping costs with others going the same way and save significantly on every shipment.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                    <i class="fas fa-map-marked-alt text-green-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Cover All Kenya</h3>
+                                    <p class="text-gray-600">We serve major routes across Kenya including Nairobi, Mombasa, Kisumu, Nakuru, and more.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                    <i class="fas fa-shield-alt text-amber-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Secure & Insured</h3>
+                                    <p class="text-gray-600">All shipments are tracked and insured for your peace of mind.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                    <i class="fas fa-mobile-alt text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Easy to Use</h3>
+                                    <p class="text-gray-600">Our simple platform makes it easy to create shipments and join groups in minutes.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center bg-blue-600 text-white rounded-xl p-8">
+                        <h2 class="text-3xl font-bold mb-4">Ready to Start Saving?</h2>
+                        <p class="text-xl mb-8">Join thousands of Kenyans already saving with ShipShare</p>
+                        <button @click="showPage('signup')" class="px-8 py-3 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100 transition duration-300">Create Free Account</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testimonials Page -->
+        <div x-show="currentPage === 'testimonials'" class="page">
+            <div class="min-h-screen bg-gray-50 py-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-4">What Kenyans Are Saying</h1>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">Real stories from real customers saving money with ShipShare Kenya</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-8 mb-16">
+                        <div class="bg-white p-8 rounded-xl shadow-lg">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                                    <span class="text-blue-500 font-bold">WM</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Wanjiku M.</h4>
+                                    <p class="text-gray-500 text-sm">Small Business Owner • Nairobi</p>
+                                </div>
+                            </div>
+                            <div class="flex text-yellow-400 mb-4">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="text-gray-700 mb-4">"ShipShare has cut my shipping costs by half! I send stock to Mombasa weekly and the group shipping feature is a game changer for my business. The platform is easy to use and the savings are real."</p>
+                            <div class="text-sm text-gray-600">
+                                <strong>Total Saved:</strong> KES 24,000+ over 6 months
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-8 rounded-xl shadow-lg">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4">
+                                    <span class="text-green-500 font-bold">OJ</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Ochieng J.</h4>
+                                    <p class="text-gray-500 text-sm">Online Seller • Kisumu</p>
+                                </div>
+                            </div>
+                            <div class="flex text-yellow-400 mb-4">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="text-gray-700 mb-4">"Finally, a platform that understands local logistics. The cost savings are incredible - from KES 3,000 to KES 1,200 per shipment! The tracking feature gives me peace of mind."</p>
+                            <div class="text-sm text-gray-600">
+                                <strong>Total Saved:</strong> KES 18,000+ over 4 months
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-8 rounded-xl shadow-lg">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mr-4">
+                                    <span class="text-amber-500 font-bold">SK</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Sarah K.</h4>
+                                    <p class="text-gray-500 text-sm">Student • Nakuru</p>
+                                </div>
+                            </div>
+                            <div class="flex text-yellow-400 mb-4">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <p class="text-gray-700 mb-4">"I use ShipShare to send care packages to my family. It's affordable and reliable. Love the real-time tracking feature! The customer support is also excellent."</p>
+                            <div class="text-sm text-gray-600">
+                                <strong>Total Saved:</strong> KES 8,400+ over 3 months
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-600 text-white rounded-xl p-8 text-center">
+                        <h2 class="text-3xl font-bold mb-4">Join Thousands of Happy Customers</h2>
+                        <p class="text-xl mb-8">Start saving on your shipments today</p>
+                        <div class="grid md:grid-cols-3 gap-8 mb-8">
+                            <div>
+                                <div class="text-4xl font-bold mb-2">15K+</div>
+                                <div class="text-blue-100">Active Users</div>
+                            </div>
+                            <div>
+                                <div class="text-4xl font-bold mb-2">50K+</div>
+                                <div class="text-blue-100">Shipments Completed</div>
+                            </div>
+                            <div>
+                                <div class="text-4xl font-bold mb-2">4.9/5</div>
+                                <div class="text-blue-100">Average Rating</div>
+                            </div>
+                        </div>
+                        <button @click="showPage('signup')" class="px-8 py-3 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100 transition duration-300">Get Started Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing Page -->
+        <div x-show="currentPage === 'pricing'" class="page">
+            <div class="min-h-screen bg-gray-50 py-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h1>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">Save money with our flexible pricing options. No hidden fees.</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-8 mb-16">
+                        <div class="bg-white rounded-xl shadow-lg p-8">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">Pay As You Go</h3>
+                            <div class="text-4xl font-bold text-gray-900 mb-4">5%</div>
+                            <p class="text-gray-600 mb-6">of shipment cost</p>
+                            <ul class="space-y-3 mb-8">
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>No monthly fees</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>Pay only when you ship</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>Basic tracking</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>Email support</span>
+                                </li>
+                            </ul>
+                            <button @click="showPage('signup')" class="w-full py-3 bg-gray-100 text-gray-900 font-bold rounded-lg hover:bg-gray-200 transition duration-300">Get Started</button>
+                        </div>
+
+                        <div class="bg-blue-600 text-white rounded-xl shadow-lg p-8 transform scale-105">
+                            <div class="bg-amber-400 text-blue-900 text-sm font-bold px-3 py-1 rounded-full inline-block mb-4">MOST POPULAR</div>
+                            <h3 class="text-2xl font-bold mb-2">Regular</h3>
+                            <div class="text-4xl font-bold mb-4">KES 50<span class="text-lg font-normal">/month</span></div>
+                            <p class="text-blue-100 mb-6">Best for regular shippers</p>
+                            <ul class="space-y-3 mb-8">
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-white mr-3"></i>
+                                    <span>Everything in Pay As You Go</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-white mr-3"></i>
+                                    <span>3% service fee</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-white mr-3"></i>
+                                    <span>Real-time tracking</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-white mr-3"></i>
+                                    <span>Priority support</span>
+                                </li>
+                            </ul>
+                            <button @click="showPage('signup')" class="w-full py-3 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100 transition duration-300">Start Free Trial</button>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-lg p-8">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">Business</h3>
+                            <div class="text-4xl font-bold text-gray-900 mb-4">KES 200<span class="text-lg font-normal">/month</span></div>
+                            <p class="text-gray-600 mb-6">For businesses and high-volume shippers</p>
+                            <ul class="space-y-3 mb-8">
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>Everything in Regular</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>2% service fee</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>Advanced analytics</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    <span>Dedicated account manager</span>
+                                </li>
+                            </ul>
+                            <button @click="showPage('signup')" class="w-full py-3 bg-gray-900 text-white font-bold rounded-lg hover:bg-gray-800 transition duration-300">Contact Sales</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-100 rounded-xl p-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">Frequently Asked Questions</h2>
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">How much can I really save?</h3>
+                                <p class="text-gray-600">Most users save between 40-70% on shipping costs by joining groups. The more people in your group, the more everyone saves!</p>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">Is my package safe?</h3>
+                                <p class="text-gray-600">Yes! All shipments are insured up to KES 50,000 and tracked in real-time. We also verify all users in groups.</p>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">How long does shipping take?</h3>
+                                <p class="text-gray-600">Delivery times vary by route: Nairobi-Mombasa (2-3 days), Nairobi-Kisumu (1-2 days), other routes (1-4 days).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Browse Groups Page -->
+        <div x-show="currentPage === 'browse'" class="page">
+            <div class="min-h-screen bg-gray-50 py-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-4">Browse Shipping Groups</h1>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">Join existing groups and save money on your shipments today</p>
+                    </div>
+
+                    <!-- Filters Section -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4">Filter Groups</h2>
+                        <div class="grid md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">From</label>
+                                <select x-model="filters.from" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>All Locations</option>
+                                    <option>Nairobi CBD</option>
+                                    <option>Westlands, Nairobi</option>
+                                    <option>Thika</option>
+                                    <option>Nakuru</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">To</label>
+                                <select x-model="filters.to" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>All Destinations</option>
+                                    <option>Mombasa</option>
+                                    <option>Kisumu</option>
+                                    <option>Nakuru</option>
+                                    <option>Eldoret</option>
+                                    <option>Malindi</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Package Type</label>
+                                <select x-model="filters.type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>All Types</option>
+                                    <option>Documents</option>
+                                    <option>Clothing</option>
+                                    <option>Electronics</option>
+                                    <option>Food Items</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                                <select x-model="filters.status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>All Status</option>
+                                    <option>Open</option>
+                                    <option>Filling Fast</option>
+                                    <option>Closing Soon</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Groups Grid -->
+                    <div class="grid md:grid-cols-3 gap-8 mb-8">
+                        <template x-for="group in getFilteredGroups()" :key="group.id">
+                            <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <div class="flex items-center text-sm text-gray-500 mb-1">
+                                            <i class="fas fa-map-marker-alt mr-2"></i>
+                                            <span x-text="group.origin"></span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-arrow-down text-blue-500 mr-2"></i>
+                                            <span class="font-bold text-gray-900" x-text="group.destination"></span>
+                                        </div>
+                                    </div>
+                                    <span class="shipment-status" :class="group.status === 'closing' ? 'status-pending' : 'status-confirmed'" x-text="group.status === 'closing' ? 'Closing Soon' : 'Open'"></span>
+                                </div>
+                                
+                                <div class="space-y-3 mb-6">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Spots left</span>
+                                        <span class="font-medium text-gray-900" x-text="`${group.maxParticipants - group.participants} of ${group.maxParticipants}`"></span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Total weight</span>
+                                        <span class="font-medium text-gray-900" x-text="group.totalWeight"></span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Closes in</span>
+                                        <span class="font-medium text-amber-600" x-text="group.deadline"></span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Package Type</span>
+                                        <span class="font-medium text-gray-900" x-text="group.packageType"></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Progress Bar -->
+                                <div class="mb-6">
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span class="text-gray-600">Group Progress</span>
+                                        <span class="font-medium text-gray-900" x-text="`${Math.round((group.participants / group.maxParticipants) * 100)}%`"></span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" :style="`width: ${(group.participants / group.maxParticipants) * 100}%`"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Current Members -->
+                                <div class="mb-6">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-2">Current Members</h4>
+                                    <div class="flex -space-x-2">
+                                        <template x-for="i in group.participants" :key="i">
+                                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-xs border-2 border-white">
+                                                <span x-text="['JD', 'SK', 'WM', 'OK', 'AN'][i-1]"></span>
+                                            </div>
+                                        </template>
+                                        <template x-for="i in (group.maxParticipants - group.participants)" :key="i">
+                                            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs border-2 border-white">
+                                                <i class="fas fa-plus text-xs"></i>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                                
+                                <div class="pt-4 border-t border-gray-200">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <div>
+                                            <div class="text-xs text-gray-500">You save</div>
+                                            <div class="text-lg font-bold text-green-600" x-text="group.savings"></div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-xs text-gray-500">Your cost</div>
+                                            <div class="text-lg font-bold text-blue-600">KES 1,200</div>
+                                        </div>
+                                    </div>
+                                    <template x-if="!user">
+                                        <button @click="showPage('signup')" class="w-full py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300">Sign Up to Join</button>
+                                    </template>
+                                    <template x-if="user">
+                                        <button @click="joinGroup(group)" class="w-full py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition duration-300">Join This Group</button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    <!-- No Results Message -->
+                    <div x-show="getFilteredGroups().length === 0" class="text-center py-12">
+                        <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-600 mb-2">No groups found</h3>
+                        <p class="text-gray-500">Try adjusting your filters to see more available groups</p>
+                    </div>
+
+                    <!-- Stats Section -->
+                    <div class="bg-blue-600 text-white rounded-xl p-8 mb-8">
+                        <div class="text-center">
+                            <h2 class="text-3xl font-bold mb-6">Join the Savings Revolution</h2>
+                            <div class="grid md:grid-cols-4 gap-8">
+                                <div>
+                                    <div class="text-4xl font-bold mb-2">KES 2.5M+</div>
+                                    <div class="text-blue-100">Saved by users</div>
+                                </div>
+                                <div>
+                                    <div class="text-4xl font-bold mb-2">15K+</div>
+                                    <div class="text-blue-100">Active groups</div>
+                                </div>
+                                <div>
+                                    <div class="text-4xl font-bold mb-2">50K+</div>
+                                    <div class="text-blue-100">Happy customers</div>
+                                </div>
+                                <div>
+                                    <div class="text-4xl font-bold mb-2">4.9/5</div>
+                                    <div class="text-blue-100">Satisfaction rating</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- How It Works -->
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">How Group Shipping Works</h2>
+                        <div class="grid md:grid-cols-4 gap-6">
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-search text-blue-600"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-900 mb-2">1. Find Group</h3>
+                                <p class="text-sm text-gray-600">Browse available groups going your way</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-users text-green-600"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-900 mb-2">2. Join Group</h3>
+                                <p class="text-sm text-gray-600">Click join and add your package details</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-box text-amber-600"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-900 mb-2">3. Ship Package</h3>
+                                <p class="text-sm text-gray-600">Courier picks up all packages together</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-piggy-bank text-purple-600"></i>
+                                </div>
+                                <h3 class="font-semibold text-gray-900 mb-2">4. Save Money</h3>
+                                <p class="text-sm text-gray-600">Pay less and track your delivery</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Page -->
+        <div x-show="currentPage === 'profile'" class="page">
+            <div class="min-h-screen bg-gray-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <!-- Profile Header -->
+                    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+                            <div class="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center">
+                                <span class="text-blue-600 font-bold text-3xl" x-text="user?.name?.charAt(0) || 'U'"></span>
+                            </div>
+                            <div class="flex-1 text-center sm:text-left">
+                                <h1 class="text-3xl font-bold text-gray-900" x-text="user?.name || 'User Name'"></h1>
+                                <p class="text-gray-600" x-text="user?.email || 'user@example.com'"></p>
+                                <p class="text-sm text-gray-500 mt-1" x-text="user?.phone || '+254 XXX XXX XXX'"></p>
+                                <div class="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
+                                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Verified Member</span>
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">Since Jan 2024</span>
+                                    <span class="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">4.9★ Rating</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <button @click="showPage('edit-profile')" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-300">Edit Profile</button>
+                                <button @click="showPage('settings')" class="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition duration-300">Settings</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Overview -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Total Shipments</p>
+                                    <p class="text-3xl font-bold text-gray-900">47</p>
+                                </div>
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-box text-blue-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Total Saved</p>
+                                    <p class="text-3xl font-bold text-green-600">KES 28,400</p>
+                                </div>
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-piggy-bank text-green-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Groups Joined</p>
+                                    <p class="text-3xl font-bold text-gray-900">23</p>
+                                </div>
+                                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-users text-amber-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Success Rate</p>
+                                    <p class="text-3xl font-bold text-purple-600">98%</p>
+                                </div>
+                                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-purple-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs Navigation -->
+                    <div class="bg-white rounded-xl shadow-lg">
+                        <div class="border-b border-gray-200">
+                            <nav class="flex -mb-px">
+                                <button @click="profileTab = 'shipments'" :class="profileTab === 'shipments' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-4 px-6 border-b-2 font-medium text-sm">
+                                    Shipping History
+                                </button>
+                                <button @click="profileTab = 'active'" :class="profileTab === 'active' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-4 px-6 border-b-2 font-medium text-sm">
+                                    Active Shipments
+                                </button>
+                                <button @click="profileTab = 'savings'" :class="profileTab === 'savings' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-4 px-6 border-b-2 font-medium text-sm">
+                                    Savings Report
+                                </button>
+                                <button @click="profileTab = 'groups'" :class="profileTab === 'groups' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-4 px-6 border-b-2 font-medium text-sm">
+                                    Group Activity
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div class="p-6">
+                            <!-- Shipping History Tab -->
+                            <div x-show="profileTab === 'shipments'" class="space-y-4">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Complete Shipping History</h3>
+                                <div class="space-y-4">
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900">Nairobi → Mombasa</h4>
+                                                <p class="text-sm text-gray-600">5kg Package • Electronics</p>
+                                            </div>
+                                            <span class="shipment-status status-delivered">Delivered</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                            <div>
+                                                <p class="text-gray-500">Shipment ID</p>
+                                                <p class="font-medium">#SH-2024-047</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Date</p>
+                                                <p class="font-medium">Mar 15, 2024</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Cost</p>
+                                                <p class="font-medium">KES 1,200</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Saved</p>
+                                                <p class="font-medium text-green-600">KES 800</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900">Westlands → Kisumu</h4>
+                                                <p class="text-sm text-gray-600">3kg Package • Documents</p>
+                                            </div>
+                                            <span class="shipment-status status-delivered">Delivered</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                            <div>
+                                                <p class="text-gray-500">Shipment ID</p>
+                                                <p class="font-medium">#SH-2024-046</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Date</p>
+                                                <p class="font-medium">Mar 10, 2024</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Cost</p>
+                                                <p class="font-medium">KES 900</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Saved</p>
+                                                <p class="font-medium text-green-600">KES 600</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900">Nairobi CBD → Nakuru</h4>
+                                                <p class="text-sm text-gray-600">8kg Package • Clothing</p>
+                                            </div>
+                                            <span class="shipment-status status-shipped">In Transit</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                            <div>
+                                                <p class="text-gray-500">Shipment ID</p>
+                                                <p class="font-medium">#SH-2024-045</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Date</p>
+                                                <p class="font-medium">Mar 20, 2024</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Cost</p>
+                                                <p class="font-medium">KES 1,500</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Saved</p>
+                                                <p class="font-medium text-green-600">KES 1,000</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Active Shipments Tab -->
+                            <div x-show="profileTab === 'active'" class="space-y-4">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Currently Active Shipments</h3>
+                                <div class="space-y-4">
+                                    <div class="border border-blue-200 bg-blue-50 rounded-lg p-4">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900">Thika → Eldoret</h4>
+                                                <p class="text-sm text-gray-600">2kg Package • Books</p>
+                                            </div>
+                                            <span class="shipment-status status-confirmed">Confirmed</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-3">
+                                            <div>
+                                                <p class="text-gray-500">Shipment ID</p>
+                                                <p class="font-medium">#SH-2024-048</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Pickup Date</p>
+                                                <p class="font-medium">Mar 25, 2024</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Est. Delivery</p>
+                                                <p class="font-medium">Mar 27, 2024</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500">Group Size</p>
+                                                <p class="font-medium">4/5 members</p>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white rounded-lg p-3">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <span class="text-sm font-medium text-gray-700">Group Progress</span>
+                                                <span class="text-sm text-blue-600">80% Full</span>
+                                            </div>
+                                            <div class="progress-bar">
+                                                <div class="progress-fill" style="width: 80%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Savings Report Tab -->
+                            <div x-show="profileTab === 'savings'" class="space-y-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Your Savings Report</h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div class="bg-green-50 rounded-lg p-6 text-center">
+                                        <div class="text-4xl font-bold text-green-600 mb-2">KES 28,400</div>
+                                        <p class="text-gray-600">Total Saved</p>
+                                    </div>
+                                    <div class="bg-blue-50 rounded-lg p-6 text-center">
+                                        <div class="text-4xl font-bold text-blue-600 mb-2">60.4%</div>
+                                        <p class="text-gray-600">Average Savings</p>
+                                    </div>
+                                    <div class="bg-amber-50 rounded-lg p-6 text-center">
+                                        <div class="text-4xl font-bold text-amber-600 mb-2">KES 604</div>
+                                        <p class="text-gray-600">Per Shipment</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                                    <h4 class="font-semibold text-gray-900 mb-4">Monthly Savings Breakdown</h4>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">March 2024</span>
+                                            <span class="font-medium text-green-600">KES 4,200</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">February 2024</span>
+                                            <span class="font-medium text-green-600">KES 3,800</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">January 2024</span>
+                                            <span class="font-medium text-green-600">KES 5,100</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Group Activity Tab -->
+                            <div x-show="profileTab === 'groups'" class="space-y-4">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Your Group Activity</h3>
+                                <div class="space-y-4">
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900">Nairobi → Mombasa Group</h4>
+                                                <p class="text-sm text-gray-600">5 members • Total weight: 45kg</p>
+                                            </div>
+                                            <span class="text-sm text-green-600 font-medium">Completed</span>
+                                        </div>
+                                        <div class="flex -space-x-2 mb-3">
+                                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-xs border-2 border-white">JD</div>
+                                            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-semibold text-xs border-2 border-white">SK</div>
+                                            <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 font-semibold text-xs border-2 border-white">WM</div>
+                                            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold text-xs border-2 border-white">OK</div>
+                                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-xs border-2 border-white">You</div>
+                                        </div>
+                                        <div class="text-sm text-gray-600">
+                                            <p>Group completed successfully on Mar 15, 2024</p>
+                                            <p class="text-green-600 font-medium">You saved KES 800 on this shipment</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Page -->
+        <div x-show="currentPage === 'contact'" class="page">
+            <div class="min-h-screen bg-gray-50 py-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">Have questions? We're here to help. Get in touch with our team.</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-12 mb-16">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h2>
+                            <form class="space-y-6" @submit.prevent="submitContact">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                                    <input type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Your name">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    <input type="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="your@email.com">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <option>General Inquiry</option>
+                                        <option>Support Question</option>
+                                        <option>Business Partnership</option>
+                                        <option>Feedback</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                                    <textarea rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="How can we help you?"></textarea>
+                                </div>
+                                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300">Send Message</button>
+                            </form>
+                        </div>
+
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
+                            <div class="space-y-6">
+                                <div class="flex items-start">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                        <i class="fas fa-map-marker-alt text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900 mb-1">Head Office</h3>
+                                        <p class="text-gray-600">Westlands, Nairobi<br>Kenya</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                        <i class="fas fa-phone text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900 mb-1">Phone</h3>
+                                        <p class="text-gray-600">+254 712 345 678<br>+254 734 567 890</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                        <i class="fas fa-envelope text-amber-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900 mb-1">Email</h3>
+                                        <p class="text-gray-600">support@shipshare.co.ke<br>info@shipshare.co.ke</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                        <i class="fas fa-clock text-purple-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900 mb-1">Business Hours</h3>
+                                        <p class="text-gray-600">Monday - Friday: 8AM - 6PM<br>Saturday: 9AM - 4PM<br>Sunday: Closed</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-8">
+                                <h3 class="font-semibold text-gray-900 mb-4">Follow Us</h3>
+                                <div class="flex space-x-4">
+                                    <a href="#" class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </a>
+                                    <a href="#" class="w-10 h-10 bg-blue-400 text-white rounded-full flex items-center justify-center hover:bg-blue-500">
+                                        <i class="fab fa-twitter"></i>
+                                    </a>
+                                    <a href="#" class="w-10 h-10 bg-pink-600 text-white rounded-full flex items-center justify-center hover:bg-pink-700">
+                                        <i class="fab fa-instagram"></i>
+                                    </a>
+                                    <a href="#" class="w-10 h-10 bg-blue-700 text-white rounded-full flex items-center justify-center hover:bg-blue-800">
+                                        <i class="fab fa-linkedin-in"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12" x-show="currentPage === 'landing'">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-boxes text-blue-400 text-2xl mr-2"></i>
+                        <span class="text-xl font-bold">ShipShare Kenya</span>
+                    </div>
+                    <p class="text-gray-400">Making shipping affordable for every Kenyan through smart group logistics.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Company</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">How It Works</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Pricing</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Safety</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Terms of Service</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Connect</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin text-xl"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
+                <p>&copy; 2024 ShipShare Kenya. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function shipShareApp() {
+            return {
+                currentPage: 'landing',
+                user: null,
+                darkMode: false,
+                mobileMenuOpen: false,
+                profileTab: 'shipments',
+                
+                mockGroups: [
+                    {
+                        id: 1,
+                        destination: 'Mombasa',
+                        origin: 'Nairobi CBD',
+                        participants: 3,
+                        maxParticipants: 5,
+                        totalWeight: '45kg',
+                        savings: 'KES 2,400',
+                        deadline: '2 days',
+                        status: 'open',
+                        route: 'Nairobi → Mombasa (A109 Highway)',
+                        packageType: 'Electronics',
+                        weight: 45
+                    },
+                    {
+                        id: 2,
+                        destination: 'Kisumu',
+                        origin: 'Westlands, Nairobi',
+                        participants: 2,
+                        maxParticipants: 4,
+                        totalWeight: '28kg',
+                        savings: 'KES 1,800',
+                        deadline: '1 day',
+                        status: 'open',
+                        route: 'Nairobi → Kisumu (A104)',
+                        packageType: 'Documents',
+                        weight: 28
+                    },
+                    {
+                        id: 3,
+                        destination: 'Nakuru',
+                        origin: 'Nairobi CBD',
+                        participants: 4,
+                        maxParticipants: 4,
+                        totalWeight: '62kg',
+                        savings: 'KES 3,200',
+                        deadline: 'Closing today',
+                        status: 'closing',
+                        route: 'Nairobi → Nakuru (A104)',
+                        packageType: 'Clothing',
+                        weight: 62
+                    },
+                    {
+                        id: 4,
+                        destination: 'Eldoret',
+                        origin: 'Thika',
+                        participants: 1,
+                        maxParticipants: 3,
+                        totalWeight: '15kg',
+                        savings: 'KES 900',
+                        deadline: '3 days',
+                        status: 'open',
+                        route: 'Thika → Eldoret',
+                        packageType: 'Food Items',
+                        weight: 15
+                    },
+                    {
+                        id: 5,
+                        destination: 'Malindi',
+                        origin: 'Nakuru',
+                        participants: 2,
+                        maxParticipants: 4,
+                        totalWeight: '35kg',
+                        savings: 'KES 1,500',
+                        deadline: '2 days',
+                        status: 'open',
+                        route: 'Nakuru → Malindi',
+                        packageType: 'Electronics',
+                        weight: 35
+                    },
+                    {
+                        id: 6,
+                        destination: 'Kisumu',
+                        origin: 'Nairobi CBD',
+                        participants: 3,
+                        maxParticipants: 5,
+                        totalWeight: '55kg',
+                        savings: 'KES 2,800',
+                        deadline: '1 day',
+                        status: 'closing',
+                        route: 'Nairobi → Kisumu (A104)',
+                        packageType: 'Clothing',
+                        weight: 55
+                    }
+                ],
+                
+                mockUsers: [], // This will store signed up users
+                
+                // Filter state
+                filters: {
+                    from: 'All Locations',
+                    to: 'All Destinations', 
+                    type: 'All Types',
+                    status: 'All Status'
+                },
+                
+                init() {
+                    // Check for saved dark mode preference
+                    if (localStorage.getItem('darkMode') === 'true') {
+                        this.darkMode = true;
+                        document.documentElement.classList.add('dark-mode');
+                    }
+                    
+                    // Load users from localStorage
+                    const savedUsers = localStorage.getItem('mockUsers');
+                    if (savedUsers) {
+                        this.mockUsers = JSON.parse(savedUsers);
+                    }
+                    
+                    // Check for saved user
+                    const savedUser = localStorage.getItem('user');
+                    if (savedUser) {
+                        this.user = JSON.parse(savedUser);
+                    }
+                    
+                    // Handle hash-based routing
+                    const handleHashChange = () => {
+                        const hash = window.location.hash.slice(1);
+                        this.currentPage = hash;
+                    };
+                    
+                    handleHashChange();
+                    window.addEventListener('hashchange', handleHashChange);
+                    
+                    return () => window.removeEventListener('hashchange', handleHashChange);
+                },
+                
+                showPage(page) {
+                    this.currentPage = page;
+                    this.mobileMenuOpen = false;
+                    
+                    // Scroll to top
+                    window.scrollTo(0, 0);
+                },
+                
+                toggleDarkMode() {
+                    this.darkMode = !this.darkMode;
+                    if (this.darkMode) {
+                        document.documentElement.classList.add('dark-mode');
+                        localStorage.setItem('darkMode', 'true');
+                    } else {
+                        document.documentElement.classList.remove('dark-mode');
+                        localStorage.setItem('darkMode', 'false');
+                    }
+                },
+                
+                login(e) {
+                    e.preventDefault();
+                    const email = e.target.email.value;
+                    const password = e.target.password.value;
+                    
+                    // Find user in mockUsers array or localStorage
+                    let foundUser = this.mockUsers.find(user => user.email === email);
+                    
+                    // If not found in mockUsers, check if there's a saved user in localStorage
+                    if (!foundUser) {
+                        const savedUsers = localStorage.getItem('mockUsers');
+                        if (savedUsers) {
+                            const users = JSON.parse(savedUsers);
+                            foundUser = users.find(user => user.email === email);
+                        }
+                    }
+                    
+                    if (foundUser) {
+                        this.user = foundUser;
+                        localStorage.setItem('user', JSON.stringify(this.user));
+                        this.showPage('dashboard');
+                    } else {
+                        alert('No account found with this email. Please sign up first.');
+                    }
+                },
+                
+                signup(e) {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const newUser = {
+                        name: formData.get('name'),
+                        email: formData.get('email'),
+                        phone: formData.get('phone') || '',
+                        password: formData.get('password') // In real app, this would be hashed
+                    };
+                    
+                    // Check if user already exists
+                    const existingUser = this.mockUsers.find(user => user.email === newUser.email);
+                    if (existingUser) {
+                        alert('An account with this email already exists. Please log in.');
+                        return;
+                    }
+                    
+                    // Add to mockUsers array
+                    this.mockUsers.push(newUser);
+                    
+                    // Save to localStorage for persistence
+                    const savedUsers = localStorage.getItem('mockUsers');
+                    const users = savedUsers ? JSON.parse(savedUsers) : [];
+                    users.push(newUser);
+                    localStorage.setItem('mockUsers', JSON.stringify(users));
+                    
+                    // Set as current user
+                    this.user = newUser;
+                    localStorage.setItem('user', JSON.stringify(this.user));
+                    this.showPage('dashboard');
+                },
+                
+                logout() {
+                    this.user = null;
+                    localStorage.removeItem('user');
+                    this.showPage('landing');
+                },
+                
+                submitContact(e) {
+                    e.preventDefault();
+                    alert('Thank you for your message! We will get back to you soon.');
+                    e.target.reset();
+                },
+                
+                joinGroup(group) {
+                    alert(`Successfully joined group to ${group.destination}! You will save ${group.savings} on this shipment.`);
+                },
+                
+                getFilteredGroups() {
+                    return this.mockGroups.filter(group => {
+                        let matches = true;
+                        
+                        // Filter by origin
+                        if (this.filters.from !== 'All Locations') {
+                            matches = matches && group.origin === this.filters.from;
+                        }
+                        
+                        // Filter by destination
+                        if (this.filters.to !== 'All Destinations') {
+                            matches = matches && group.destination === this.filters.to;
+                        }
+                        
+                        // Filter by package type
+                        if (this.filters.type !== 'All Types') {
+                            matches = matches && group.packageType === this.filters.type;
+                        }
+                        
+                        // Filter by status
+                        if (this.filters.status !== 'All Status') {
+                            if (this.filters.status === 'Filling Fast') {
+                                matches = matches && (group.participants / group.maxParticipants) >= 0.6 && (group.participants / group.maxParticipants) < 1;
+                            } else {
+                                matches = matches && group.status === this.filters.status.toLowerCase();
+                            }
+                        }
+                        
+                        return matches;
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>

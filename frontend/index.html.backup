@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShipShare Kenya - Save Money Shipping Together</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        },
+                        accent: {
+                            500: '#10b981', // Emerald for Kenya/Safari vibe
+                            600: '#059669',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .step-wizard-active {
+            @apply bg-primary-600 text-white border-primary-600;
+        }
+        
+        .step-wizard-inactive {
+            @apply bg-gray-200 text-gray-500 border-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useContext, createContext } = React;
+        
+        // Mock Data - Kenya Context
+        const LOCATIONS = [
+            'Nairobi CBD', 'Westlands, Nairobi', 'Mombasa Island', 'Kisumu CBD', 
+            'Nakuru Town', 'Eldoret CBD', 'Thika', 'Ngong Road, Nairobi'
+        ];
+        
+        const DESTINATIONS = [
+            'Mombasa', 'Nairobi', 'Kisumu', 'Nakuru', 'Eldoret', 'Malindi', 
+            'Machakos', 'Nyeri', 'Meru', 'Kakamega'
+        ];
+        
+        const MOCK_GROUPS = [
+            {
+                id: 1,
+                destination: 'Mombasa',
+                origin: 'Nairobi CBD',
+                participants: 3,
+                maxParticipants: 5,
+                totalWeight: '45kg',
+                savings: 'KES 2,400',
+                deadline: '2 days',
+                status: 'open',
+                route: 'Nairobi → Mombasa (A109 Highway)',
+                members: ['John K.', 'Sarah M.', 'You']
+            },
+            {
+                id: 2,
+                destination: 'Kisumu',
+                origin: 'Westlands, Nairobi',
+                participants: 2,
+                maxParticipants: 4,
+                totalWeight: '28kg',
+                savings: 'KES 1,800',
+                deadline: '1 day',
+                status: 'open',
+                route: 'Nairobi → Kisumu (A104)',
+                members: ['Peter O.', 'You']
+            },
+            {
+                id: 3,
+                destination: 'Nakuru',
+                origin: 'Nairobi CBD',
+                participants: 4,
+                maxParticipants: 4,
+                totalWeight: '62kg',
+                savings: 'KES 3,200',
+                deadline: 'Closing today',
+                status: 'closing',
+                route: 'Nairobi → Nakuru (A104)',
+                members: ['Alice W.', 'Bob K.', 'Carol N.', 'You']
+            }
+        ];
+        
+        const MOCK_SHIPMENTS = [
+            {
+                id: 'SH-001',
+                origin: 'Nairobi CBD',
+                destination: 'Mombasa',
+                weight: '5kg',
+                status: 'grouped',
+                cost: 'KES 800',
+                originalCost: 'KES 2,000',
+                savings: 'KES 1,200',
+                date: '2024-01-15',
+                groupSize: 4,
+                eta: '2 days'
+            },
+            {
+                id: 'SH-002',
+                origin: 'Westlands, Nairobi',
+                destination: 'Kisumu',
+                weight: '3kg',
+                status: 'in_transit',
+                cost: 'KES 600',
+                originalCost: 'KES 1,500',
+                savings: 'KES 900',
+                date: '2024-01-10',
+                groupSize: 3,
+                eta: '1 day'
+            },
+            {
+                id: 'SH-003',
+                origin: 'Thika',
+                destination: 'Nakuru',
+                weight: '12kg',
+                status: 'delivered',
+                cost: 'KES 1,200',
+                originalCost: 'KES 3,000',
+                savings: 'KES 1,800',
+                date: '2024-01-05',
+                groupSize: 5,
+                eta: 'Delivered'
+            }
+        ];
+        
+        // Context for Auth
+        const AuthContext = createContext(null);
+        
+        // Components
+        
+        const Button = ({ children, variant = 'primary', size = 'md', className = '', onClick, type = 'button', disabled = false }) => {
+            const baseStyles = "inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+            
+            const variants = {
+                primary: "bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 shadow-sm",
+                secondary: "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500 dark:bg-slate-800 dark:text-gray-200 dark:border-slate-600 dark:hover:bg-slate-700",
+                accent: "bg-accent-500 text-white hover:bg-accent-600 focus:ring-accent-500 shadow-sm",
+                ghost: "bg-transparent text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800",
+                danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+            };
+            
+            const sizes = {
+                sm: "px-3 py-1.5 text-sm",
+                md: "px-4 py-2.5 text-sm",
+                lg: "px-6 py-3 text-base",
+                xl: "px-8 py-4 text-lg"
+            };
+            
+            return (
+                <button 
+                    type={type}
+                    onClick={onClick}
+                    disabled={disabled}
+                    className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+                >
+                    {children}
+                </button>
+            );
+        };
+        
+        const Card = ({ children, className = '', hover = false }) => {
+            return (
+                <div className={`bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm ${hover ? 'hover:shadow-md transition-shadow cursor-pointer' : ''} ${className}`}>
+                    {children}
+                </div>
+            );
+        };
+        
+        const Badge = ({ children, variant = 'default' }) => {
+            const variants = {
+                default: "bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-gray-300",
+                success: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+                warning: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+                primary: "bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400",
+                accent: "bg-accent-100 text-accent-800 dark:bg-accent-900/30 dark:text-accent-400"
+            };
+            
+            return (
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]}`}>
+                    {children}
+                </span>
+            );
+        };
+        
+        const Input = ({ label, type = 'text', placeholder, value, onChange, required = false, error = '', icon = null }) => {
+            return (
+                <div className="space-y-1.5">
+                    {label && (
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {label} {required && <span className="text-red-500">*</span>}
+                        </label>
+                    )}
+                    <div className="relative">
+                        {icon && (
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i data-lucide={icon} className="w-5 h-5"></i>
+                            </div>
+                        )}
+                        <input
+                            type={type}
+                            value={value}
+                            onChange={onChange}
+                            placeholder={placeholder}
+                            className={`block w-full rounded-lg border ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-slate-600 focus:border-primary-500 focus:ring-primary-500'} shadow-sm py-2.5 ${icon ? 'pl-10' : 'pl-4'} pr-4 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-colors`}
+                        />
+                    </div>
+                    {error && <p className="text-sm text-red-600">{error}</p>}
+                </div>
+            );
+        };
+        
+        const Select = ({ label, options, value, onChange, required = false }) => {
+            return (
+                <div className="space-y-1.5">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {label} {required && <span className="text-red-500">*</span>}
+                    </label>
+                    <select
+                        value={value}
+                        onChange={onChange}
+                        className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 focus:border-primary-500 focus:ring-primary-500 py-2.5 px-4 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 shadow-sm"
+                    >
+                        <option value="">Select option</option>
+                        {options.map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                    </select>
+                </div>
+            );
+        };
+        
+        // Layout Components
+        
+        const Navbar = ({ user, onLogout, darkMode, toggleDarkMode }) => {
+            const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+            
+            return (
+                <nav className="sticky top-0 z-50 glass border-b border-gray-200 dark:border-slate-700">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between h-16">
+                            <div className="flex items-center">
+                                <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer" onClick={() => window.location.hash = '#'}>
+                                    <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-accent-500 rounded-lg flex items-center justify-center text-white font-bold">
+                                        <i data-lucide="package" className="w-5 h-5"></i>
+                                    </div>
+                                    <span className="text-xl font-bold bg-gradient-to-r from-primary-700 to-accent-600 bg-clip-text text-transparent">
+                                        ShipShare
+                                    </span>
+                                    <span className="text-xs bg-accent-100 text-accent-800 dark:bg-accent-900/30 dark:text-accent-400 px-2 py-0.5 rounded-full font-medium">
+                                        Kenya
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div className="hidden md:flex items-center space-x-4">
+                                {!user ? (
+                                    <>
+                                        <button onClick={toggleDarkMode} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-gray-400">
+                                            <i data-lucide={darkMode ? "sun" : "moon"} className="w-5 h-5"></i>
+                                        </button>
+                                        <a href="#login" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">Sign In</a>
+                                        <Button onClick={() => window.location.hash = '#signup'}>Get Started</Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button onClick={toggleDarkMode} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-gray-400">
+                                            <i data-lucide={darkMode ? "sun" : "moon"} className="w-5 h-5"></i>
+                                        </button>
+                                        <div className="relative">
+                                            <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-gray-400 relative">
+                                                <i data-lucide="bell" className="w-5 h-5"></i>
+                                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                                            </button>
+                                        </div>
+                                        <div className="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-slate-700">
+                                            <div className="text-right hidden lg:block">
+                                                <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                                            </div>
+                                            <div className="w-9 h-9 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-700 dark:text-primary-400 font-semibold">
+                                                {user.name.charAt(0)}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                            
+                            <div className="flex items-center md:hidden">
+                                <button 
+                                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                    className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800"
+                                >
+                                    <i data-lucide={mobileMenuOpen ? "x" : "menu"} className="w-6 h-6"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {mobileMenuOpen && (
+                        <div className="md:hidden bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
+                            <div className="px-2 pt-2 pb-3 space-y-1">
+                                {!user ? (
+                                    <>
+                                        <a href="#login" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 hover:bg-gray-50 dark:hover:bg-slate-800">Sign In</a>
+                                        <a href="#signup" className="block px-3 py-2 rounded-md text-base font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 dark:hover:bg-slate-800">Get Started</a>
+                                    </>
+                                ) : (
+                                    <>
+                                        <a href="#dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800">Dashboard</a>
+                                        <a href="#profile" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800">Profile</a>
+                                        <button onClick={onLogout} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">Sign Out</button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </nav>
+            );
+        };
+        
+        const Sidebar = ({ activePage }) => {
+            const menuItems = [
+                { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
+                { id: 'create', label: 'New Shipment', icon: 'plus-circle' },
+                { id: 'groups', label: 'Find Groups', icon: 'users' },
+                { id: 'shipments', label: 'My Shipments', icon: 'package' },
+                { id: 'profile', label: 'Profile', icon: 'user' },
+            ];
+            
+            return (
+                <aside className="hidden lg:block w-64 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 min-h-[calc(100vh-4rem)]">
+                    <div className="p-6">
+                        <div className="space-y-1">
+                            {menuItems.map(item => (
+                                <a
+                                    key={item.id}
+                                    href={`#${item.id}`}
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activePage === item.id || (activePage === '' && item.id === 'dashboard') ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700/50 hover:text-gray-900 dark:hover:text-gray-200'}`}
+                                >
+                                    <i data-lucide={item.icon} className="w-5 h-5"></i>
+                                    {item.label}
+                                </a>
+                            ))}
+                        </div>
+                        
+                        <div className="mt-8 pt-8 border-t border-gray-200 dark:border-slate-700">
+                            <div className="bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl p-4 text-white">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <i data-lucide="zap" className="w-5 h-5"></i>
+                                    <span className="font-semibold text-sm">Pro Tip</span>
+                                </div>
+                                <p className="text-xs text-white/90 mb-3">Ship during off-peak hours for extra savings!</p>
+                                <div className="text-xs font-medium bg-white/20 rounded px-2 py-1 inline-block">
+                                    Save up to 40%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            );
+        };
+        
+        // Page Components
+        
+        const LandingPage = () => {
+            useEffect(() => {
+                lucide.createIcons();
+            }, []);
+            
+            const steps = [
+                {
+                    icon: 'map-pin',
+                    title: 'Enter Your Route',
+                    desc: 'Tell us where you\'re shipping from and to within Kenya'
+                },
+                {
+                    icon: 'users',
+                    title: 'Join a Group',
+                    desc: 'We match you with others shipping to the same destination'
+                },
+                {
+                    icon: 'banknote',
+                    title: 'Save Money',
+                    desc: 'Split costs and save up to 60% on shipping fees'
+                }
+            ];
+            
+            const testimonials = [
+                {
+                    name: 'Wanjiku M.',
+                    role: 'Small Business Owner',
+                    location: 'Nairobi',
+                    content: 'ShipShare has cut my shipping costs by half! I send stock to Mombasa weekly and the group shipping feature is a game changer.',
+                    avatar: 'WM'
+                },
+                {
+                    name: 'Ochieng J.',
+                    role: 'Online Seller',
+                    location: 'Kisumu',
+                    content: 'Finally, a platform that understands local logistics. The cost savings are real - from KES 3,000 to KES 1,200 per shipment!',
+                    avatar: 'OJ'
+                },
+                {
+                    name: 'Sarah K.',
+                    role: 'Student',
+                    location: 'Nakuru',
+                    content: 'I use ShipShare to send care packages to my family. It\'s affordable and reliable. Love the tracking feature!',
+                    avatar: 'SK'
+                }
+            ];
+            
+            return (
+                <div className="fade-in">
+                    {/* Hero Section */}
+                    <div className="relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-accent-50 dark:from-slate-900 dark:to-slate-800 opacity-50"></div>
+                        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 lg:pt-32 lg:pb-40">
+                            <div className="text-center max-w-3xl mx-auto">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-400 text-sm font-medium mb-8 shadow-sm">
+                                    <span className="flex h-2 w-2 rounded-full bg-accent-500 animate-pulse"></span>
+                                    Now serving major routes in Kenya
+                                </div>
+                                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white tracking-tight mb-6">
+                                    Save Money by <br/>
+                                    <span className="bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent">Shipping Together</span>
+                                </h1>
+                                <p className="text-xl text-gray-600 dark:text-gray-300 mb-10 leading-relaxed">
+                                    Join thousands of Kenyans reducing shipping costs through group logistics. 
+                                    Perfect for small businesses, online sellers, and individuals.
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                    <Button size="xl" onClick={() => window.location.hash = '#signup'} className="gap-2">
+                                        <span>Get Started Free</span>
+                                        <i data-lucide="arrow-right" className="w-5 h-5"></i>
+                                    </Button>
+                                    <Button variant="secondary" size="xl" onClick={() => window.location.hash = '#groups'} className="gap-2">
+                                        <i data-lucide="search" className="w-5 h-5"></i>
+                                        <span>View Active Groups</span>
+                                    </Button>
+                                </div>
+                                
+                                <div className="mt-12 flex items-center justify-center gap-8 text-sm text-gray-500 dark:text-gray-400">
+                                    <div className="flex items-center gap-2">
+                                        <i data-lucide="shield-check" className="w-5 h-5 text-accent-500"></i>
+                                        <span>Secure & Insured</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <i data-lucide="clock" className="w-5 h-5 text-accent-500"></i>
+                                        <span>24-48h Delivery</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <i data-lucide="banknote" className="w-5 h-5 text-accent-500"></i>
+                                        <span>Save up to 60%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Stats Bar */}
+                        <div className="border-t border-gray-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                                    <div>
+                                        <div className="text-3xl font-bold text-primary-600 dark:text-primary-400">KES 12M+</div>
+                                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Saved by users</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-3xl font-bold text-primary-600 dark:text-primary-400">50K+</div>
+                                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Shipments grouped</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-3xl font-bold text-primary-600 dark:text-primary-400">15K+</div>
+                                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Active users</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-3xl font-bold text-primary-600 dark:text-primary-400">4.9/5</div>
+                                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">User rating</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* How it Works */}
+                    <div className="py-24 bg-white dark:bg-slate-900">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="text-center mb-16">
+                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">How ShipShare Works</h2>
+                                <p className="text-lg text-gray-600 dark:text-gray-400">Three simple steps to smarter shipping</p>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-3 gap-8">
+                                {steps.map((step, idx) => (
+                                    <div key={idx} className="relative">
+                                        <div className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-8 text-center hover:shadow-lg transition-shadow">
+                                            <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center text-primary-600 dark:text-primary-400 mx-auto mb-6">
+                                                <i data-lucide={step.icon} className="w-8 h-8"></i>
+                                            </div>
+                                            <div className="absolute -top-3 -left-3 w-8 h-8 bg-accent-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                                {idx + 1}
+                                            </div>
+                                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">{step.title}</h3>
+                                            <p className="text-gray-600 dark:text-gray-400">{step.desc}</p>
+                                        </div>
+                                        {idx < 2 && (
+                                            <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                                                <i data-lucide="arrow-right" className="w-8 h-8 text-gray-300 dark:text-slate-600"></i>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Active Routes Preview */}
+                    <div className="py-24 bg-gray-50 dark:bg-slate-800/50">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex flex-col md:flex-row justify-between items-end mb-12">
+                                <div>
+                                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Popular Routes Today</h2>
+                                    <p className="text-gray-600 dark:text-gray-400">Join existing groups and ship today</p>
+                                </div>
+                                <Button variant="secondary" onClick={() => window.location.hash = '#groups'} className="mt-4 md:mt-0">
+                                    View All Routes
+                                </Button>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-3 gap-6">
+                                {MOCK_GROUPS.map(group => (
+                                    <Card key={group.id} hover className="p-6">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-1">
+                                                    <i data-lucide="map-pin" className="w-4 h-4"></i>
+                                                    {group.origin}
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <i data-lucide="arrow-down" className="w-4 h-4 text-primary-500"></i>
+                                                    <span className="font-semibold text-gray-900 dark:text-white">{group.destination}</span>
+                                                </div>
+                                            </div>
+                                            <Badge variant={group.status === 'closing' ? 'warning' : 'success'}>
+                                                {group.status === 'closing' ? 'Closing Soon' : 'Open'}
+                                            </Badge>
+                                        </div>
+                                        
+                                        <div className="space-y-3 mb-6">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-600 dark:text-gray-400">Spots left</span>
+                                                <span className="font-medium text-gray-900 dark:text-white">{group.maxParticipants - group.participants} of {group.maxParticipants}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-600 dark:text-gray-400">Total weight</span>
+                                                <span className="font-medium text-gray-900 dark:text-white">{group.totalWeight}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-600 dark:text-gray-400">Closes in</span>
+                                                <span className="font-medium text-accent-600 dark:text-accent-400">{group.deadline}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="pt-4 border-t border-gray-200 dark:border-slate-700 flex justify-between items-center">
+                                            <div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400">You save</div>
+                                                <div className="text-lg font-bold text-accent-600 dark:text-accent-400">{group.savings}</div>
+                                            </div>
+                                            <Button size="sm" onClick={() => window.location.hash = '#groups'}>Join Group</Button>
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Testimonials */}
+                    <div className="py-24 bg-white dark:bg-slate-900">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-16">Trusted by Kenyans Nationwide</h2>
+                            <div className="grid md:grid-cols-3 gap-8">
+                                {testimonials.map((t, idx) => (
+                                    <Card key={idx} className="p-6">
+                                        <div className="flex items-center gap-1 mb-4">
+                                            {[1,2,3,4,5].map(star => (
+                                                <i key={star} data-lucide="star" className="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+                                            ))}
+                                        </div>
+                                        <p className="text-gray-700 dark:text-gray-300 mb-6 italic">"{t.content}"</p>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-700 dark:text-primary-400 font-semibold text-sm">
+                                                {t.avatar}
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold text-gray-900 dark:text-white text-sm">{t.name}</div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400">{t.role} • {t.location}</div>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* CTA Section */}
+                    <div className="py-24 bg-primary-600 dark:bg-primary-900">
+                        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Ready to start saving on shipping?</h2>
+                            <p className="text-primary-100 text-lg mb-10 max-w-2xl mx-auto">
+                                Join thousands of smart shippers across Kenya. Create your first shipment in under 2 minutes.
+                            </p>
+                            <Button size="xl" variant="accent" onClick={() => window.location.hash = '#signup'} className="shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
+                                Create Free Account
+                            </Button>
+                        </div>
+                    </div>
+                    
+                    {/* Footer */}
+                    <footer className="bg-gray-900 dark:bg-black text-gray-300 py-12 border-t border-gray-800">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid md:grid-cols-4 gap-8 mb-8">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center text-white">
+                                            <i data-lucide="package" className="w-5 h-5"></i>
+                                        </div>
+                                        <span className="text-xl font-bold text-white">ShipShare</span>
+                                    </div>
+                                    <p className="text-sm text-gray-400">Making logistics affordable for every Kenyan.</p>
+                                </div>
+                                <div>
+                                    <h4 className="text-white font-semibold mb-4">Product</h4>
+                                    <ul className="space-y-2 text-sm">
+                                        <li><a href="#" className="hover:text-white">How it Works</a></li>
+                                        <li><a href="#groups" className="hover:text-white">Find Groups</a></li>
+                                        <li><a href="#" className="hover:text-white">Pricing</a></li>
+                                        <li><a href="#" className="hover:text-white">Business</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="text-white font-semibold mb-4">Company</h4>
+                                    <ul className="space-y-2 text-sm">
+                                        <li><a href="#" className="hover:text-white">About Us</a></li>
+                                        <li><a href="#" className="hover:text-white">Careers</a></li>
+                                        <li><a href="#" className="hover:text-white">Press</a></li>
+                                        <li><a href="#" className="hover:text-white">Contact</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="text-white font-semibold mb-4">Support</h4>
+                                    <ul className="space-y-2 text-sm">
+                                        <li><a href="#" className="hover:text-white">Help Center</a></li>
+                                        <li><a href="#" className="hover:text-white">Safety</a></li>
+                                        <li><a href="#" className="hover:text-white">Terms of Service</a></li>
+                                        <li><a href="#" className="hover:text-white">Privacy Policy</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+                                <p className="text-sm text-gray-500">© 2024 ShipShare Kenya. All rights reserved.</p>
+                                <div className="flex gap-4 mt-4 md:mt-0">
+                                    <i data-lucide="twitter" className="w-5 h-5 hover:text-white cursor-pointer"></i>
+                                    <i data-lucide="facebook" className="w-5 h-5 hover:text-white cursor-pointer"></i>
+                                    <i data-lucide="instagram" className="w-5 h-5 hover:text-white cursor-pointer"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+        
+        const LoginPage = ({ onLogin }) => {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [loading, setLoading] = useState(false);
+            
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setTimeout(() => {
+                    onLogin({ name: 'John Kamau', email: email });
+                    window.location.hash = '#dashboard';
+                    setLoading(false);
+                }, 1000);
+            };
+            
+            useEffect(() => { lucide.createIcons(); }, []);
+            
+            return (
+                <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-50 dark:bg-slate-900 py-12 px-4 sm:px-6 lg:px-8 fade-in">
+                    <Card className="w-full max-w-md p-8">
+                        <div className="text-center mb-8">
+                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome back</h2>
+                            <p className="mt-2 text-gray-600 dark:text-gray-400">Sign in to your ShipShare account</p>
+                        </div>
+                        
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <Input
+                                label="Email Address"
+                                type="email"
+                                placeholder="john@example.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                icon="mail"
+                            />
+                            
+                            <div className="space-y-1">
+                                <Input
+                                    label="Password"
+                                    type="password"
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    icon="lock"
+                                />
+                                <div className="flex justify-end">
+                                    <a href="#" className="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400">Forgot password?</a>
+                                </div>
+                            </div>
+                            
+                            <Button type="submit" className="w-full" disabled={loading}>
+                                {loading ? 'Signing in...' : 'Sign In'}
+                            </Button>
+                        </form>
+                        
+                        <div className="mt-6 text-center">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Don't have an account?{' '}
+                                <a href="#signup" className="text-primary-600 hover:text-primary-500 dark:text-primary-400 font-medium">Sign up</a>
+                            </p>
+                        </div>
+                        
+                        <div className="mt-6">
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-gray-300 dark:border-slate-600"></div>
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-2 bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400">Or continue with</span>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-6 grid grid-cols-2 gap-3">
+                                <Button variant="secondary" className="w-full">
+                                    <i data-lucide="phone" className="w-5 h-5 mr-2"></i>
+                                    MPesa
+                                </Button>
+                                <Button variant="secondary" className="w-full">
+                                    <i data-lucide="smartphone" className="w-5 h-5 mr-2"></i>
+                                    Google
+                                </Button>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            );
+        };
+        
+        const SignupPage = ({ onLogin }) => {
+            const [step, setStep] = useState(1);
+            const [formData, setFormData] = useState({
+                name: '',
+                email: '',
+                phone: '',
+                password: '',
+                userType: 'individual'
+            });
+            
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onLogin({ name: formData.name, email: formData.email });
+                window.location.hash = '#dashboard';
+            };
+            
+            useEffect(() => { lucide.createIcons(); }, [step]);
+            
+            return (
+                <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-50 dark:bg-slate-900 py-12 px-4 sm:px-6 lg:px-8 fade-in">
+                    <Card className="w-full max-w-lg p-8">
+                        <div className="text-center mb-8">
+                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Create your account</h2>
+                            <p className="mt-2 text-gray-600 dark:text-gray-400">Start saving on shipping today</p>
+                        </div>
+                        
+                        {/* Step indicator */}
+                        <div className="flex items-center justify-center mb-8">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step >= 1 ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-500 dark:bg-slate-700'}`}>1</div>
+                            <div className={`w-16 h-1 ${step >= 2 ? 'bg-primary-600' : 'bg-gray-200 dark:bg-slate-700'}`}></div>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step >= 2 ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-500 dark:bg-slate-700'}`}>2</div>
+                        </div>
+                        
+                        <form onSubmit={handleSubmit}>
+                            {step === 1 ? (
+                                <div className="space-y-6 fade-in">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({...formData, userType: 'individual'})}
+                                            className={`p-4 rounded-lg border-2 text-center transition-all ${formData.userType === 'individual' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300'}`}
+                                        >
+                                            <i data-lucide="user" className="w-8 h-8 mx-auto mb-2 text-primary-600"></i>
+                                            <div className="font-medium text-gray-900 dark:text-white">Individual</div>
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">Personal use</div>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({...formData, userType: 'business'})}
+                                            className={`p-4 rounded-lg border-2 text-center transition-all ${formData.userType === 'business' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300'}`}
+                                        >
+                                            <i data-lucide="building-2" className="w-8 h-8 mx-auto mb-2 text-primary-600"></i>
+                                            <div className="font-medium text-gray-900 dark:text-white">Business</div>
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">For my shop/store</div>
+                                        </button>
+                                    </div>
+                                    
+                                    <Input
+                                        label="Full Name"
+                                        placeholder="John Kamau"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                        required
+                                        icon="user"
+                                    />
+                                    
+                                    <Input
+                                        label="Email Address"
+                                        type="email"
+                                        placeholder="john@example.com"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                        required
+                                        icon="mail"
+                                    />
+                                    
+                                    <Button type="button" className="w-full" onClick={() => setStep(2)}>
+                                        Continue
+                                        <i data-lucide="arrow-right" className="w-4 h-4 ml-2"></i>
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="space-y-6 fade-in">
+                                    <Input
+                                        label="Phone Number (MPesa)"
+                                        type="tel"
+                                        placeholder="+254 712 345 678"
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                        required
+                                        icon="phone"
+                                    />
+                                    
+                                    <Input
+                                        label="Password"
+                                        type="password"
+                                        placeholder="Create a strong password"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                        required
+                                        icon="lock"
+                                    />
+                                    
+                                    <div className="flex items-start gap-2">
+                                        <input type="checkbox" required className="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+                                        <label className="text-sm text-gray-600 dark:text-gray-400">
+                                            I agree to the <a href="#" className="text-primary-600 hover:underline">Terms of Service</a> and <a href="#" className="text-primary-600 hover:underline">Privacy Policy</a>
+                                        </label>
+                                    </div>
+                                    
+                                    <div className="flex gap-3">
+                                        <Button type="button" variant="secondary" className="flex-1" onClick={() => setStep(1)}>
+                                            Back
+                                        </Button>
+                                        <Button type="submit" className="flex-1">
+                                            Create Account
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </form>
+                        
+                        <div className="mt-6 text-center">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Already have an account?{' '}
+                                <a href="#login" className="text-primary-600 hover:text-primary-500 dark:text-primary-400 font-medium">Sign in</a>
+                            </p>
+                        </div>
+                    </Card>
+                </div>
+            );
+        };
+        
+        const Dashboard = () => {
+            useEffect(() => { lucide.createIcons(); }, []);
+            
+            const stats = [
+                { label: 'Active Shipments', value: '2', icon: 'package', color: 'blue' },
+                { label: 'Total Saved', value: 'KES 4,500', icon: 'banknote', color: 'green' },
+                { label: 'Groups Joined', value: '3', icon: 'users', color: 'purple' },
+                { label: 'Delivered', value: '12', icon: 'check-circle', color: 'gray' }
+            ];
+            
+            return (
+                <div className="fade-in">
+                    <div className="mb-8">
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+                        <p className="text-gray-600 dark:text-gray-400">Welcome back! Here's what's happening with your shipments.</p>
+                    </div>
+                    
+                    {/* Stats Grid */}
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        {stats.map((stat, idx) => (
+                            <Card key={idx} className="p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.label}</p>
+                                        <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
+                                    </div>
+                                    <div className={`w-12 h-12 rounded-lg bg-${stat.color}-100 dark:bg-${stat.color}-900/30 flex items-center justify-center text-${stat.color}-600 dark:text-${stat.color}-400`}>
+                                        <i data-lucide={stat.icon} className="w-6 h-6"></i>
+                                    </div>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                    
+                    <div className="grid lg:grid-cols-3 gap-8">
+                        {/* Main Content */}
+                        <div className="lg:col-span-2 space-y-6">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Shipments</h2>
+                                <a href="#shipments" className="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 font-medium">View all</a>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                {MOCK_SHIPMENTS.slice(0, 2).map(shipment => (
+                                    <Card key={shipment.id} className="p-6">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div className="flex items-start gap-4">
+                                                <div className="w-12 h-12 rounded-lg bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                                                    <i data-lucide="package" className="w-6 h-6"></i>
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="font-semibold text-gray-900 dark:text-white">{shipment.id}</span>
+                                                        <Badge variant={shipment.status === 'delivered' ? 'success' : shipment.status === 'in_transit' ? 'primary' : 'warning'}>
+                                                            {shipment.status.replace('_', ' ')}
+                                                        </Badge>
+                                                    </div>
+                                                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                        {shipment.origin} → {shipment.destination} • {shipment.weight}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right sm:pl-4 sm:border-l border-gray-200 dark:border-slate-700">
+                                                <div className="text-sm font-medium text-gray-900 dark:text-white">{shipment.cost}</div>
+                                                <div className="text-xs text-accent-600 dark:text-accent-400">Saved {shipment.savings}</div>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                            
+                            {/* Quick Action */}
+                            <Card className="p-6 bg-gradient-to-br from-primary-600 to-primary-700 dark:from-primary-900 dark:to-slate-800 text-white border-none">
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-1">Ready to ship something?</h3>
+                                        <p className="text-primary-100 text-sm">Create a new shipment and find a group to share costs with.</p>
+                                    </div>
+                                    <Button variant="accent" onClick={() => window.location.hash = '#create'} className="shadow-lg">
+                                        <i data-lucide="plus" className="w-5 h-5 mr-2"></i>
+                                        Create Shipment
+                                    </Button>
+                                </div>
+                            </Card>
+                        </div>
+                        
+                        {/* Sidebar Content */}
+                        <div className="space-y-6">
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Available Groups Near You</h2>
+                            <div className="space-y-4">
+                                {MOCK_GROUPS.map(group => (
+                                    <Card key={group.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.hash = '#groups'}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="font-medium text-gray-900 dark:text-white text-sm">{group.origin}</div>
+                                            <Badge variant="accent" className="text-xs">Save {group.savings}</Badge>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm mb-3">
+                                            <i data-lucide="arrow-down" className="w-4 h-4"></i>
+                                            {group.destination}
+                                        </div>
+                                        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                            <span>{group.participants}/{group.maxParticipants} members</span>
+                                            <span className="text-accent-600 dark:text-accent-400">{group.deadline} left</span>
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                            
+                            <div className="bg-accent-50 dark:bg-accent-900/20 rounded-xl p-4 border border-accent-100 dark:border-accent-900/30">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <div className="w-8 h-8 rounded-full bg-accent-100 dark:bg-accent-900/50 flex items-center justify-center text-accent-600 dark:text-accent-400">
+                                        <i data-lucide="trending-up" className="w-4 h-4"></i>
+                                    </div>
+                                    <span className="font-semibold text-accent-900 dark:text-accent-400 text-sm">Savings this month</span>
+                                </div>
+                                <div className="text-2xl font-bold text-accent-700 dark:text-accent-400">KES 4,500</div>
+                                <div className="text-xs text-accent-600/80 dark:text-accent-500 mt-1">Based on 3 shared shipments</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const CreateShipment = () => {
+            const [step, setStep] = useState(1);
+            const [formData, setFormData] = useState({
+                origin: '',
+                destination: '',
+                weight: '',
+                type: '',
+                date: '',
+                description: ''
+            });
+            const [loading, setLoading] = useState(false);
+            
+            const handleSubmit = () => {
+                setLoading(true);
+                setTimeout(() => {
+                    setLoading(false);
+                    window.location.hash = '#groups';
+                }, 1500);
+            };
+            
+            useEffect(() => { lucide.createIcons(); }, [step]);
+            
+            const steps = [
+                { num: 1, label: 'Location' },
+                { num: 2, label: 'Package' },
+                { num: 3, label: 'Schedule' },
+                { num: 4, label: 'Review' }
+            ];
+            
+            return (
+                <div className="max-w-3xl mx-auto fade-in">
+                    <div className="mb-8">
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Create New Shipment</h1>
+                        <p className="text-gray-600 dark:text-gray-400">Share the details and we'll find you a group</p>
+                    </div>
+                    
+                    {/* Step Wizard */}
+                    <div className="mb-8">
+                        <div className="flex items-center justify-between">
+                            {steps.map((s, idx) => (
+                                <div key={s.num} className="flex items-center flex-1 last:flex-none">
+                                    <div className={`flex flex-col items-center`}>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm border-2 transition-colors ${step >= s.num ? 'bg-primary-600 text-white border-primary-600' : 'bg-white dark:bg-slate-800 text-gray-400 border-gray-300 dark:border-slate-600'}`}>
+                                            {step > s.num ? <i data-lucide="check" className="w-5 h-5"></i> : s.num}
+                                        </div>
+                                        <span className={`mt-2 text-xs font-medium ${step >= s.num ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'}`}>{s.label}</span>
+                                    </div>
+                                    {idx < steps.length - 1 && (
+                                        <div className={`flex-1 h-0.5 mx-4 ${step > s.num ? 'bg-primary-600' : 'bg-gray-300 dark:bg-slate-600'}`}></div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    <Card className="p-6 md:p-8">
+                        {step === 1 && (
+                            <div className="space-y-6 fade-in">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Where are you shipping from and to?</h3>
+                                
+                                <Select
+                                    label="Pickup Location"
+                                    options={LOCATIONS}
+                                    value={formData.origin}
+                                    onChange={(e) => setFormData({...formData, origin: e.target.value})}
+                                    required
+                                />
+                                
+                                <div className="flex justify-center">
+                                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center text-gray-400">
+                                        <i data-lucide="arrow-down" className="w-5 h-5"></i>
+                                    </div>
+                                </div>
+                                
+                                <Select
+                                    label="Destination"
+                                    options={DESTINATIONS}
+                                    value={formData.destination}
+                                    onChange={(e) => setFormData({...formData, destination: e.target.value})}
+                                    required
+                                />
+                                
+                                <div className="pt-4 flex justify-end">
+                                    <Button onClick={() => setStep(2)} disabled={!formData.origin || !formData.destination}>
+                                        Continue
+                                        <i data-lucide="arrow-right" className="w-4 h-4 ml-2"></i>
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {step === 2 && (
+                            <div className="space-y-6 fade-in">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Tell us about your package</h3>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                    {['Documents', 'Electronics', 'Clothing', 'Food', 'Fragile', 'Other'].map((type) => (
+                                        <button
+                                            key={type}
+                                            type="button"
+                                            onClick={() => setFormData({...formData, type})}
+                                            className={`p-4 rounded-lg border-2 text-center transition-all ${formData.type === type ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300 text-gray-700 dark:text-gray-300'}`}
+                                        >
+                                            {type}
+                                        </button>
+                                    ))}
+                                </div>
+                                
+                                <Input
+                                    label="Approximate Weight"
+                                    placeholder="e.g., 5kg"
+                                    value={formData.weight}
+                                    onChange={(e) => setFormData({...formData, weight: e.target.value})}
+                                    required
+                                    icon="weight"
+                                />
+                                
+                                <Input
+                                    label="Package Description (Optional)"
+                                    placeholder="What's inside?"
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                />
+                                
+                                <div className="pt-4 flex justify-between">
+                                    <Button variant="secondary" onClick={() => setStep(1)}>Back</Button>
+                                    <Button onClick={() => setStep(3)} disabled={!formData.type || !formData.weight}>
+                                        Continue
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {step === 3 && (
+                            <div className="space-y-6 fade-in">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">When do you want to ship?</h3>
+                                
+                                <div className="grid grid-cols-3 gap-4 mb-6">
+                                    {['Today', 'Tomorrow', 'This Week'].map((option) => (
+                                        <button
+                                            key={option}
+                                            type="button"
+                                            onClick={() => setFormData({...formData, date: option})}
+                                            className={`p-3 rounded-lg border-2 text-center text-sm transition-all ${formData.date === option ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-slate-700'}`}
+                                        >
+                                            {option}
+                                        </button>
+                                    ))}
+                                </div>
+                                
+                                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900/30 rounded-lg p-4 flex gap-3">
+                                    <i data-lucide="info" className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5"></i>
+                                    <div className="text-sm text-yellow-800 dark:text-yellow-200">
+                                        <p className="font-medium mb-1">Flexible dates save more!</p>
+                                        <p className="text-yellow-700/80 dark:text-yellow-300/80">If you're flexible within 2-3 days, we can find you bigger groups with better savings.</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="pt-4 flex justify-between">
+                                    <Button variant="secondary" onClick={() => setStep(2)}>Back</Button>
+                                    <Button onClick={() => setStep(4)} disabled={!formData.date}>
+                                        Review Details
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {step === 4 && (
+                            <div className="space-y-6 fade-in">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Review your shipment</h3>
+                                
+                                <div className="bg-gray-50 dark:bg-slate-800 rounded-lg p-6 space-y-4">
+                                    <div className="flex justify-between py-2 border-b border-gray-200 dark:border-slate-700">
+                                        <span className="text-gray-600 dark:text-gray-400">Route</span>
+                                        <span className="font-medium text-gray-900 dark:text-white">{formData.origin} → {formData.destination}</span>
+                                    </div>
+                                    <div className="flex justify-between py-2 border-b border-gray-200 dark:border-slate-700">
+                                        <span className="text-gray-600 dark:text-gray-400">Type</span>
+                                        <span className="font-medium text-gray-900 dark:text-white">{formData.type}</span>
+                                    </div>
+                                    <div className="flex justify-between py-2 border-b border-gray-200 dark:border-slate-700">
+                                        <span className="text-gray-600 dark:text-gray-400">Weight</span>
+                                        <span className="font-medium text-gray-900 dark:text-white">{formData.weight}</span>
+                                    </div>
+                                    <div className="flex justify-between py-2 border-b border-gray-200 dark:border-slate-700">
+                                        <span className="text-gray-600 dark:text-gray-400">Shipping Date</span>
+                                        <span className="font-medium text-gray-900 dark:text-white">{formData.date}</span>
+                                    </div>
+                                    <div className="flex justify-between py-2 text-lg font-semibold">
+                                        <span className="text-gray-900 dark:text-white">Est. Solo Cost</span>
+                                        <span className="text-gray-900 dark:text-white">KES 2,500</span>
+                                    </div>
+                                    <div className="flex justify-between py-2 text-lg font-bold text-accent-600 dark:text-accent-400">
+                                        <span>Est. Group Cost</span>
+                                        <span>KES 1,000 - 1,500</span>
+                                    </div>
+                                </div>
+                                
+                                <div className="pt-4 flex justify-between">
+                                    <Button variant="secondary" onClick={() => setStep(3)}>Back</Button>
+                                    <Button onClick={handleSubmit} disabled={loading}>
+                                        {loading ? 'Creating...' : 'Find Groups'}
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </Card>
+                </div>
+            );
+        };
+        
+        const MatchingGroups = () => {
+            const [selectedGroup, setSelectedGroup] = useState(null);
+            const [joining, setJoining] = useState(false);
+            
+            useEffect(() => { lucide.createIcons(); }, []);
+            
+            const handleJoin = (group) => {
+                setSelectedGroup(group);
+                setJoining(true);
+                setTimeout(() => {
+                    setJoining(false);
+                    setSelectedGroup(null);
+                    alert(`Successfully joined group to ${group.destination}!`);
+                }, 1500);
+            };
+            
+            return (
+                <div className="fade-in">
+                    <div className="mb-8">
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Available Shipping Groups</h1>
+                        <p className="text-gray-600 dark:text-gray-400">Join a group heading to your destination and save up to 60%</p>
+                    </div>
+                    
+                    {/* Filters */}
+                    <div className="flex flex-wrap gap-4 mb-8">
+                        <div className="flex-1 min-w-[200px]">
+                            <input 
+                                type="text" 
+                                placeholder="Filter by destination..." 
+                                className="w-full rounded
+<script src="https://deepsite.hf.co/deepsite-badge.js"></script>
