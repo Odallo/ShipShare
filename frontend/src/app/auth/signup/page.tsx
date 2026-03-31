@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, User, Phone, ArrowRight, Package, Building2 } from 'lucide-react';
+import { Mail, Lock, User, Phone, ArrowRight, Package, Building2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,26 +11,38 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function SignupPage() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    name: 'John Kamau',
-    email: 'john.kamau@example.com',
-    phone: '+254712345678',
-    password: 'password123',
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
     userType: 'individual',
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
   const { signup } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await signup({
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-    });
-    router.push('/dashboard');
-    setLoading(false);
+    setError('');
+    try {
+      const success = await signup({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+      });
+      if (success) {
+        router.push('/dashboard');
+      } else {
+        setError('Could not create your account. Please try again.');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -55,6 +67,13 @@ export default function SignupPage() {
           <div className={`w-16 h-1 ${step >= 2 ? 'bg-primary-600' : 'bg-gray-200 dark:bg-slate-700'}`}></div>
           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step >= 2 ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-500 dark:bg-slate-700'}`}>2</div>
         </div>
+
+        {error && (
+          <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
         {step === 1 ? (
           <div className="space-y-6 fade-in">
@@ -91,6 +110,7 @@ export default function SignupPage() {
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
                   placeholder="John Kamau"
+                  required
                 />
               </div>
             </div>
@@ -107,11 +127,23 @@ export default function SignupPage() {
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
                   placeholder="john@example.com"
+                  required
                 />
               </div>
             </div>
 
-            <Button type="button" className="w-full" onClick={() => setStep(2)}>
+            <Button
+              type="button"
+              className="w-full"
+              onClick={() => {
+                if (!formData.name.trim() || !formData.email.trim()) {
+                  setError('Please fill in your name and email before continuing.');
+                  return;
+                }
+                setError('');
+                setStep(2);
+              }}
+            >
               Continue
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
@@ -147,6 +179,7 @@ export default function SignupPage() {
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
                   placeholder="Create a strong password"
+                  minLength={8}
                   required
                 />
               </div>

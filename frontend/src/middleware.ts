@@ -10,9 +10,9 @@ const authRoutes = ['/auth/login', '/auth/signup'];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Check if user is authenticated by looking for the auth cookie/token
+  // Check if user is authenticated by looking for the auth cookie
   const userCookie = request.cookies.get('shipshare_user');
-  const isAuthenticated = !!userCookie;
+  const isAuthenticated = !!userCookie?.value;
   
   // If trying to access protected route without auth, redirect to login
   if (protectedRoutes.some(route => pathname.startsWith(route))) {

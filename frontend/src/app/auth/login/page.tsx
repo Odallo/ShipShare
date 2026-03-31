@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, ArrowRight, Package, Phone, Smartphone } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Package, Phone, Smartphone, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,15 +12,26 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await login(email, password);
-    router.push('/dashboard');
-    setLoading(false);
+    setError('');
+    try {
+      const success = await login(email, password);
+      if (success) {
+        router.push('/dashboard');
+      } else {
+        setError('Invalid email or password. Please try again.');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,6 +49,13 @@ export default function LoginPage() {
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome back</h2>
           <p className="mt-2 text-gray-600 dark:text-gray-400">Sign in to your ShipShare account</p>
         </div>
+
+        {error && (
+          <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -110,7 +128,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/auth/signup" className="text-primary-600 hover:text-primary-500 dark:text-primary-400 font-medium">
             Sign up
           </Link>

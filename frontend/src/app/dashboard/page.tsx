@@ -8,9 +8,13 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Navbar } from '@/components/layout/Navbar';
+import { useAuth } from '@/contexts/AuthContext';
 import { mockShipments, mockUser, mockGroups } from '@/utils/mockData';
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const currentUser = user || mockUser;
+
   const stats = {
     activeShipments: mockShipments.filter(s => s.status !== 'delivered').length,
     totalSaved: 1850,
@@ -29,7 +33,7 @@ export default function DashboardPage() {
             {/* Welcome Section */}
             <div className="mb-8">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Welcome back, {mockUser.name.split(' ')[0]}!
+                Welcome back, {currentUser.name.split(' ')[0]}!
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Here's what's happening with your shipments today.

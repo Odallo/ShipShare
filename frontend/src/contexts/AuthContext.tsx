@@ -3,11 +3,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '@/types';
 
+interface SignupData {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  location?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (userData: Partial<User>) => Promise<boolean>;
+  signup: (userData: SignupData) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -26,48 +34,71 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock login - in production, this would call an API
-    const mockUser: User = {
-      id: '1',
-      name: 'John Odallo',
-      email: email,
-      phone: '+254 712 345 678',
-      location: 'Nairobi, CBD',
-      joinDate: new Date(),
-    };
-    
-    setUser(mockUser);
-    setIsAuthenticated(true);
-    localStorage.setItem('shipshare_user', JSON.stringify(mockUser));
-    // Set cookie for middleware
-    document.cookie = 'shipshare_user=true; path=/; max-age=86400';
-    return true;
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Login error:', error.error);
+        return false;
+      }
+
+      const data = await response.json();
+      const user = data.user;
+
+      setUser(user);
+      setIsAuthenticated(true);
+      localStorage.setItem('shipshare_user', JSON.stringify(user));
+      return true;
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
+    }
   };
 
-  const signup = async (userData: Partial<User>): Promise<boolean> => {
-    const newUser: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: userData.name || '',
-      email: userData.email || '',
-      phone: userData.phone || '',
-      location: userData.location || '',
-      joinDate: new Date(),
-    };
-    
-    setUser(newUser);
-    setIsAuthenticated(true);
-    localStorage.setItem('shipshare_user', JSON.stringify(newUser));
-    // Set cookie for middleware
-    document.cookie = 'shipshare_user=true; path=/; max-age=86400';
-    return true;
+  const signup = async (userData: SignupData): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Signup error:', error.error);
+        return false;
+      }
+
+      const data = await response.json();
+      const user = data.user;
+
+      setUser(user);
+      setIsAuthenticated(true);
+      localStorage.setItem('shipshare_user', JSON.stringify(user));
+      return true;
+    } catch (error) {
+      console.error('Signup failed:', error);
+      return false;
+    }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('shipshare_user');
-    // Clear cookie
-    document.cookie = 'shipshare_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   };
 
   return (
