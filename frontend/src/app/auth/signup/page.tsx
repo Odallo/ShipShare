@@ -2,9 +2,11 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Mail, Lock, User, Phone, ArrowRight, Package, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignupPage() {
   const [step, setStep] = useState(1);
@@ -16,14 +18,19 @@ export default function SignupPage() {
     userType: 'individual',
   });
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { signup } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      window.location.href = '/dashboard';
-    }, 1500);
+    await signup({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+    });
+    router.push('/dashboard');
+    setLoading(false);
   };
 
   return (
