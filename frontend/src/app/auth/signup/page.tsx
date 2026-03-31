@@ -11,10 +11,10 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function SignupPage() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
+    name: 'John Kamau',
+    email: 'john.kamau@example.com',
+    phone: '+254712345678',
+    password: 'password123',
     userType: 'individual',
   });
   const [loading, setLoading] = useState(false);
@@ -92,7 +92,6 @@ export default function SignupPage() {
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
                     placeholder="John Kamau"
-                    required
                   />
                 </div>
               </div>
@@ -109,7 +108,6 @@ export default function SignupPage() {
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
                     placeholder="john@example.com"
-                    required
                   />
                 </div>
               </div>
