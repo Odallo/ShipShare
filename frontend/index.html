@@ -264,7 +264,566 @@
 
     <!-- Page Content -->
     <main>
-        <!-- Landing Page -->
+        <!-- My Shipments Page -->
+        <div x-show="currentPage === 'shipments'" class="page">
+            <div class="min-h-screen bg-gray-50 py-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-8">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-4">My Shipments</h1>
+                        <p class="text-xl text-gray-600">Track all your shipments in one place</p>
+                    </div>
+
+                    <!-- Stats Overview -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Active</p>
+                                    <p class="text-3xl font-bold text-blue-600">3</p>
+                                </div>
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-truck text-blue-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">In Transit</p>
+                                    <p class="text-3xl font-bold text-amber-600">2</p>
+                                </div>
+                                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-shipping-fast text-amber-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Delivered</p>
+                                    <p class="text-3xl font-bold text-green-600">42</p>
+                                </div>
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check-circle text-green-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Total Saved</p>
+                                    <p class="text-3xl font-bold text-purple-600">KES 28.4K</p>
+                                </div>
+                                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-piggy-bank text-purple-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                        <div class="flex flex-col md:flex-row gap-4 items-center">
+                            <div class="flex-1">
+                                <input type="text" placeholder="Search shipments..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option>All Status</option>
+                                <option>Active</option>
+                                <option>In Transit</option>
+                                <option>Delivered</option>
+                                <option>Cancelled</option>
+                            </select>
+                            <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option>All Routes</option>
+                                <option>Nairobi → Mombasa</option>
+                                <option>Nairobi → Kisumu</option>
+                                <option>Nairobi → Nakuru</option>
+                                <option>Other Routes</option>
+                            </select>
+                            <button class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-300">
+                                <i class="fas fa-filter mr-2"></i>
+                                Apply Filters
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Shipments List -->
+                    <div class="space-y-4">
+                        <!-- Active Shipment -->
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center mb-2">
+                                        <span class="shipment-status status-confirmed px-3 py-1 text-sm font-medium">Active</span>
+                                        <span class="ml-3 text-gray-500 text-sm">Shipment #SH-2024-052</span>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-gray-900 mb-1">Nairobi → Mombasa</h3>
+                                    <p class="text-gray-600">5kg Electronics • Group of 4</p>
+                                </div>
+                                <div class="text-right">
+                                    <button class="px-3 py-1 text-blue-600 hover:text-blue-700">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-4 gap-4 text-sm mb-4">
+                                <div>
+                                    <p class="text-gray-500">Pickup</p>
+                                    <p class="font-medium">Mar 25, 2024</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Delivery</p>
+                                    <p class="font-medium">Mar 27, 2024</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Cost</p>
+                                    <p class="font-medium">KES 1,200</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Saved</p>
+                                    <p class="font-medium text-green-600">KES 800</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex -space-x-2">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-xs">JD</div>
+                                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-semibold text-xs">SK</div>
+                                    <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 font-semibold text-xs">WM</div>
+                                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">+1</div>
+                                </div>
+                                <button class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-300">
+                                    Track Shipment
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- In Transit Shipment -->
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-amber-500">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center mb-2">
+                                        <span class="shipment-status status-shipped px-3 py-1 text-sm font-medium">In Transit</span>
+                                        <span class="ml-3 text-gray-500 text-sm">Shipment #SH-2024-051</span>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-gray-900 mb-1">Westlands → Kisumu</h3>
+                                    <p class="text-gray-600">3kg Documents • Group of 3</p>
+                                </div>
+                                <div class="text-right">
+                                    <button class="px-3 py-1 text-blue-600 hover:text-blue-700">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-4 gap-4 text-sm mb-4">
+                                <div>
+                                    <p class="text-gray-500">Pickup</p>
+                                    <p class="font-medium">Mar 23, 2024</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Delivery</p>
+                                    <p class="font-medium">Mar 24, 2024</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Cost</p>
+                                    <p class="font-medium">KES 900</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Saved</p>
+                                    <p class="font-medium text-green-600">KES 600</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-amber-50 rounded-lg p-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-amber-800">Current Location: Nairobi CBD Hub</span>
+                                    <span class="text-sm text-amber-600">ETA: 2 hours</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex -space-x-2">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-xs">OK</div>
+                                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-semibold text-xs">AN</div>
+                                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">+1</div>
+                                </div>
+                                <button class="px-4 py-2 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 transition duration-300">
+                                    <i class="fas fa-map-marked-alt mr-2"></i>
+                                    Live Tracking
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Delivered Shipment -->
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center mb-2">
+                                        <span class="shipment-status status-delivered px-3 py-1 text-sm font-medium">Delivered</span>
+                                        <span class="ml-3 text-gray-500 text-sm">Shipment #SH-2024-050</span>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-gray-900 mb-1">Nairobi CBD → Nakuru</h3>
+                                    <p class="text-gray-600">8kg Clothing • Group of 4</p>
+                                </div>
+                                <div class="text-right">
+                                    <button class="px-3 py-1 text-blue-600 hover:text-blue-700">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-4 gap-4 text-sm mb-4">
+                                <div>
+                                    <p class="text-gray-500">Pickup</p>
+                                    <p class="font-medium">Mar 20, 2024</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Delivery</p>
+                                    <p class="font-medium">Mar 22, 2024</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Cost</p>
+                                    <p class="font-medium">KES 1,500</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Saved</p>
+                                    <p class="font-medium text-green-600">KES 1,000</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex -space-x-2">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-xs">JD</div>
+                                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-semibold text-xs">SK</div>
+                                    <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 font-semibold text-xs">WM</div>
+                                    <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold text-xs">OK</div>
+                                </div>
+                                <button class="px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition duration-300">
+                                    <i class="fas fa-receipt mr-2"></i>
+                                    View Receipt
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div x-show="currentPage === 'settings'" class="page">
+            <div class="min-h-screen bg-gray-50 py-12">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-8">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-4">Settings</h1>
+                        <p class="text-xl text-gray-600">Manage your account preferences and notifications</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <!-- Profile Settings -->
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-6">Profile Settings</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                    <input type="text" x-model="user?.name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    <input type="email" x-model="user?.email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                                    <input type="tel" x-model="user?.phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <button class="w-full py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-300">
+                                    Update Profile
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Notification Settings -->
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-6">Notifications</h2>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-900">Email Notifications</h3>
+                                        <p class="text-sm text-gray-500">Receive updates about your shipments</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white peer-checked:after:bg-blue-600 peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-900">SMS Alerts</h3>
+                                        <p class="text-sm text-gray-500">Get SMS for important updates</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white peer-checked:after:bg-blue-600 peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-900">Push Notifications</h3>
+                                        <p class="text-sm text-gray-500">Browser notifications for live updates</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white peer-checked:after:bg-blue-600 peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Privacy Settings -->
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-6">Privacy & Security</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                                    <input type="password" placeholder="Enter current password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                                    <input type="password" placeholder="Enter new password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                                    <input type="password" placeholder="Confirm new password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <button class="w-full py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition duration-300">
+                                    Change Password
+                                </button>
+                                <div class="mt-4 pt-4 border-t border-gray-200">
+                                    <button class="w-full py-2 border border-red-300 text-red-700 font-medium rounded-lg hover:bg-red-50 transition duration-300">
+                                        Delete Account
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Page -->
+        <div x-show="currentPage === 'notifications'" class="page">
+            <div class="min-h-screen bg-gray-50 py-12">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-8">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-4">Notifications</h1>
+                        <p class="text-xl text-gray-600">Stay updated on your shipments and account activity</p>
+                    </div>
+
+                    <!-- Notification Tabs -->
+                    <div class="bg-white rounded-xl shadow-lg">
+                        <div class="border-b border-gray-200">
+                            <nav class="flex -mb-px">
+                                <button class="py-4 px-6 border-b-2 border-blue-500 text-blue-600 font-medium text-sm">
+                                    All Notifications
+                                </button>
+                                <button class="py-4 px-6 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm">
+                                    Shipments
+                                </button>
+                                <button class="py-4 px-6 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm">
+                                    Groups
+                                </button>
+                                <button class="py-4 px-6 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm">
+                                    Account
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- Notification List -->
+                        <div class="p-6 space-y-4">
+                            <!-- Today's Notifications -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Today</h3>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex items-start p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
+                                            <i class="fas fa-truck text-blue-600"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-gray-900">Shipment Picked Up</h4>
+                                            <p class="text-sm text-gray-600">Your package from Nairobi to Mombasa has been picked up by the courier</p>
+                                            <p class="text-xs text-gray-500 mt-1">2 hours ago</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3 flex-shrink-0">
+                                            <i class="fas fa-check-circle text-green-600"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-gray-900">Shipment Delivered</h4>
+                                            <p class="text-sm text-gray-600">Package to Kisumu has been successfully delivered</p>
+                                            <p class="text-xs text-gray-500 mt-1">5 hours ago</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start p-4 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+                                        <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3 flex-shrink-0">
+                                            <i class="fas fa-users text-amber-600"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-gray-900">Group Almost Full</h4>
+                                            <p class="text-sm text-gray-600">Your Nairobi → Nakuru group has 4/5 members</p>
+                                            <p class="text-xs text-gray-500 mt-1">8 hours ago</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Yesterday's Notifications -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Yesterday</h3>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex items-start p-4 bg-gray-50 rounded-lg border-l-4 border-gray-500">
+                                        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3 flex-shrink-0">
+                                            <i class="fas fa-dollar-sign text-gray-600"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-gray-900">Payment Processed</h4>
+                                            <p class="text-sm text-gray-600">Payment of KES 1,200 for your shipment has been confirmed</p>
+                                            <p class="text-xs text-gray-500 mt-1">1 day ago</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3 flex-shrink-0">
+                                            <i class="fas fa-star text-purple-600"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-gray-900">New Achievement!</h4>
+                                            <p class="text-sm text-gray-600">You've saved over KES 25,000! You're now a Gold Saver</p>
+                                            <p class="text-xs text-gray-500 mt-1">1 day ago</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help/FAQ Page -->
+        <div x-show="currentPage === 'help'" class="page">
+            <div class="min-h-screen bg-gray-50 py-12">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-8">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-4">Help & FAQ</h1>
+                        <p class="text-xl text-gray-600">Find answers to common questions and get support</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-8 mb-8">
+                        <!-- Quick Help -->
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-4">Quick Help</h2>
+                            <div class="space-y-4">
+                                <a href="#" class="flex items-center p-3 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition duration-300">
+                                    <i class="fas fa-plus-circle text-blue-600 mr-3"></i>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Create Shipment</h3>
+                                        <p class="text-sm text-gray-500">Step-by-step guide to create your first shipment</p>
+                                    </div>
+                                </a>
+                                <a href="#" class="flex items-center p-3 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition duration-300">
+                                    <i class="fas fa-users text-green-600 mr-3"></i>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Join Groups</h3>
+                                        <p class="text-sm text-gray-500">How to find and join existing groups</p>
+                                    </div>
+                                </a>
+                                <a href="#" class="flex items-center p-3 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition duration-300">
+                                    <i class="fas fa-truck text-amber-600 mr-3"></i>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Track Shipments</h3>
+                                        <p class="text-sm text-gray-500">Real-time tracking and status updates</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- FAQ -->
+                        <div class="bg-white rounded-xl shadow-lg p-6 md:col-span-2">
+                            <h2 class="text-xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+                            <div class="space-y-6">
+                                <div class="border-b border-gray-200 pb-4">
+                                    <h3 class="font-semibold text-gray-900 mb-2">How does ShipShare Kenya work?</h3>
+                                    <p class="text-gray-600">ShipShare Kenya connects people shipping to similar destinations, allowing them to split shipping costs and save up to 70% on each shipment.</p>
+                                </div>
+                                <div class="border-b border-gray-200 pb-4">
+                                    <h3 class="font-semibold text-gray-900 mb-2">How much can I save?</h3>
+                                    <p class="text-gray-600">Savings vary by route and group size, but most users save between 40-70% compared to individual shipping costs.</p>
+                                </div>
+                                <div class="border-b border-gray-200 pb-4">
+                                    <h3 class="font-semibold text-gray-900 mb-2">Is my package insured?</h3>
+                                    <p class="text-gray-600">Yes! All shipments through ShipShare Kenya are insured up to KES 50,000 at no additional cost.</p>
+                                </div>
+                                <div class="border-b border-gray-200 pb-4">
+                                    <h3 class="font-semibold text-gray-900 mb-2">How long does shipping take?</h3>
+                                    <p class="text-gray-600">Delivery times vary: Nairobi-Mombasa (2-3 days), Nairobi-Kisumu (1-2 days), other routes (1-4 days).</p>
+                                </div>
+                                <div class="border-b border-gray-200 pb-4">
+                                    <h3 class="font-semibold text-gray-900 mb-2">What payment methods are accepted?</h3>
+                                    <p class="text-gray-600">We accept M-Pesa, bank transfers, and all major credit/debit cards. Payment is processed securely.</p>
+                                </div>
+                                <div class="pb-4">
+                                    <h3 class="font-semibold text-gray-900 mb-2">How do I contact support?</h3>
+                                    <p class="text-gray-600">You can reach our support team via email at support@shipshare.co.ke or call us at +254 712 345 678 during business hours.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Support -->
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-4">Still Need Help?</h2>
+                            <p class="text-gray-600 mb-6">Our support team is here to help you with any questions or issues.</p>
+                            <div class="space-y-4">
+                                <div class="flex items-center p-4 bg-blue-50 rounded-lg">
+                                    <i class="fas fa-envelope text-blue-600 text-2xl mr-4"></i>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Email Support</h3>
+                                        <p class="text-gray-600">support@shipshare.co.ke</p>
+                                        <p class="text-sm text-gray-500">Response within 24 hours</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center p-4 bg-green-50 rounded-lg">
+                                    <i class="fas fa-phone text-green-600 text-2xl mr-4"></i>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Phone Support</h3>
+                                        <p class="text-gray-600">+254 712 345 678</p>
+                                        <p class="text-sm text-gray-500">Mon-Fri: 8AM-6PM, Sat: 9AM-4PM</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center p-4 bg-amber-50 rounded-lg">
+                                    <i class="fas fa-comments text-amber-600 text-2xl mr-4"></i>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Live Chat</h3>
+                                        <p class="text-gray-600">Chat with our team</p>
+                                        <button class="mt-2 px-4 py-2 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 transition duration-300">
+                                            Start Chat
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
         <div x-show="currentPage === 'landing'" class="page">
             <!-- Hero Section -->
             <section class="hero-gradient text-white relative overflow-hidden">
@@ -658,6 +1217,18 @@
                                 <a href="#" @click="showPage('profile')" class="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
                                     <i class="fas fa-user mr-3"></i>
                                     My Profile
+                                </a>
+                                <a href="#" @click="showPage('notifications')" class="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                    <i class="fas fa-bell mr-3"></i>
+                                    Notifications
+                                </a>
+                                <a href="#" @click="showPage('settings')" class="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                    <i class="fas fa-cog mr-3"></i>
+                                    Settings
+                                </a>
+                                <a href="#" @click="showPage('help')" class="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                    <i class="fas fa-question-circle mr-3"></i>
+                                    Help
                                 </a>
                             </nav>
                         </div>
@@ -1644,7 +2215,177 @@
             </div>
         </div>
 
-        <!-- Contact Page -->
+        <!-- Create Shipment Page -->
+        <div x-show="currentPage === 'create'" class="page">
+            <div class="min-h-screen bg-gray-50 py-12">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-8">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-4">Create New Shipment</h1>
+                        <p class="text-xl text-gray-600">Save money by joining or creating a shipping group</p>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="mb-8">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold">1</div>
+                                <div class="w-16 h-1 bg-blue-600"></div>
+                                <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold">2</div>
+                                <div class="w-16 h-1 bg-gray-300"></div>
+                                <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold">3</div>
+                                <div class="w-16 h-1 bg-gray-300"></div>
+                                <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold">4</div>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill bg-blue-600" style="width: 25%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-600 mt-2">
+                            <span>Package Details</span>
+                            <span>Step 1 of 4</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Package Details -->
+                    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Step 1: Package Details</h2>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Package Type</label>
+                                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>Select package type</option>
+                                    <option>Documents</option>
+                                    <option>Clothing</option>
+                                    <option>Electronics</option>
+                                    <option>Food Items</option>
+                                    <option>Books</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
+                                <input type="number" placeholder="Enter package weight" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Package Description</label>
+                                <textarea rows="3" placeholder="Describe your package contents" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Estimated Value (KES)</label>
+                                <input type="number" placeholder="Package value for insurance" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Route Selection -->
+                    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Route Information</h2>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Pickup Location</label>
+                                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>Select pickup location</option>
+                                    <option>Nairobi CBD</option>
+                                    <option>Westlands, Nairobi</option>
+                                    <option>Eastlands, Nairobi</option>
+                                    <option>Thika</option>
+                                    <option>Nakuru</option>
+                                    <option>Kisumu</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Destination</label>
+                                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>Select destination</option>
+                                    <option>Mombasa</option>
+                                    <option>Kisumu</option>
+                                    <option>Nakuru</option>
+                                    <option>Eldoret</option>
+                                    <option>Malindi</option>
+                                    <option>Nanyuki</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Pickup Date</label>
+                                <input type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Delivery Preference</label>
+                                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>Standard (2-3 days)</option>
+                                    <option>Express (1-2 days) - Extra KES 500</option>
+                                    <option>Economy (3-5 days) - Save KES 300</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Group Options -->
+                    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Group Options</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <input type="radio" name="groupOption" id="joinExisting" class="mr-3">
+                                <label for="joinExisting" class="text-gray-700">
+                                    <span class="font-semibold">Join Existing Group</span>
+                                    <p class="text-sm text-gray-500">Find and join an existing shipping group</p>
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" name="groupOption" id="createNew" class="mr-3" checked>
+                                <label for="createNew" class="text-gray-700">
+                                    <span class="font-semibold">Create New Group</span>
+                                    <p class="text-sm text-gray-500">Start a new group and let others join you</p>
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" name="groupOption" id="shipAlone" class="mr-3">
+                                <label for="shipAlone" class="text-gray-700">
+                                    <span class="font-semibold">Ship Alone</span>
+                                    <p class="text-sm text-gray-500">Ship by yourself (no savings)</p>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cost Estimate -->
+                    <div class="bg-blue-50 rounded-xl p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Cost Estimate</h2>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-gray-900 mb-2">KES 3,000</div>
+                                <p class="text-gray-600">Regular Cost</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-green-600 mb-2">KES 1,200</div>
+                                <p class="text-gray-600">Group Cost</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-blue-600 mb-2">KES 1,800</div>
+                                <p class="text-gray-600">You Save</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between">
+                        <button class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition duration-300">
+                            Save as Draft
+                        </button>
+                        <div class="space-x-4">
+                            <button class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition duration-300">
+                                Previous
+                            </button>
+                            <button @click="showPage('create-step2')" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-300">
+                                Next Step
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Shipments Page -->
         <div x-show="currentPage === 'contact'" class="page">
             <div class="min-h-screen bg-gray-50 py-12">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
