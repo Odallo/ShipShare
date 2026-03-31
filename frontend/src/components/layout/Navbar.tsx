@@ -2,14 +2,21 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X, Package, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-  const isAuthenticated = true; // Mock auth state
+  const router = useRouter();
+  const { isAuthenticated, logout } = useAuth();
+  
+  const handleLogout = () => {
+    logout();
+    router.push('/');
+  };
   
   const navigation = [
     { name: 'Dashboard', href: '/dashboard' },
@@ -52,7 +59,7 @@ export const Navbar: React.FC = () => {
                     Profile
                   </Button>
                 </Link>
-                <Button variant="danger" size="sm">
+                <Button variant="danger" size="sm" onClick={handleLogout}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
                 </Button>

@@ -39,6 +39,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(mockUser);
     setIsAuthenticated(true);
     localStorage.setItem('shipshare_user', JSON.stringify(mockUser));
+    // Set cookie for middleware
+    document.cookie = 'shipshare_user=true; path=/; max-age=86400';
     return true;
   };
 
@@ -55,6 +57,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(newUser);
     setIsAuthenticated(true);
     localStorage.setItem('shipshare_user', JSON.stringify(newUser));
+    // Set cookie for middleware
+    document.cookie = 'shipshare_user=true; path=/; max-age=86400';
     return true;
   };
 
@@ -62,6 +66,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('shipshare_user');
+    // Clear cookie
+    document.cookie = 'shipshare_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   };
 
   return (
