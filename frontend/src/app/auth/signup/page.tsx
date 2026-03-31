@@ -56,127 +56,119 @@ export default function SignupPage() {
           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step >= 2 ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-500 dark:bg-slate-700'}`}>2</div>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          {step === 1 ? (
-            <div className="space-y-6 fade-in">
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  onClick={() => setFormData({...formData, userType: 'individual'})}
-                  className={`p-4 rounded-lg border-2 text-center transition-all ${formData.userType === 'individual' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300'}`}
-                >
-                  <User className="w-8 h-8 mx-auto mb-2 text-primary-600" />
-                  <div className="font-medium text-gray-900 dark:text-white">Individual</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Personal use</div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({...formData, userType: 'business'})}
-                  className={`p-4 rounded-lg border-2 text-center transition-all ${formData.userType === 'business' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300'}`}
-                >
-                  <Building2 className="w-8 h-8 mx-auto mb-2 text-primary-600" />
-                  <div className="font-medium text-gray-900 dark:text-white">Business</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">For my shop/store</div>
-                </button>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
-                    placeholder="John Kamau"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
-                    placeholder="john@example.com"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4">
+        {step === 1 ? (
+          <div className="space-y-6 fade-in">
+            <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
-                className="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                onClick={() => setStep(2)}
+                onClick={() => setFormData({...formData, userType: 'individual'})}
+                className={`p-4 rounded-lg border-2 text-center transition-all ${formData.userType === 'individual' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300'}`}
               >
-                Continue
-                <ArrowRight className="w-4 h-4 ml-2" />
+                <User className="w-8 h-8 mx-auto mb-2 text-primary-600" />
+                <div className="font-medium text-gray-900 dark:text-white">Individual</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Personal use</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({...formData, userType: 'business'})}
+                className={`p-4 rounded-lg border-2 text-center transition-all ${formData.userType === 'business' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300'}`}
+              >
+                <Building2 className="w-8 h-8 mx-auto mb-2 text-primary-600" />
+                <div className="font-medium text-gray-900 dark:text-white">Business</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">For my shop/store</div>
               </button>
             </div>
-          ) : (
-            <div className="space-y-6 fade-in">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Phone Number (MPesa)
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
-                    placeholder="+254 712 345 678"
-                    required
-                  />
-                </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <input
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
-                    placeholder="Create a strong password"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <input type="checkbox" required className="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
-                <label className="text-sm text-gray-600 dark:text-gray-400">
-                  I agree to the <Link href="#" className="text-primary-600 hover:underline">Terms of Service</Link> and <Link href="#" className="text-primary-600 hover:underline">Privacy Policy</Link>
-                </label>
-              </div>
-
-              <div className="flex gap-3">
-                <Button type="button" variant="secondary" className="flex-1" onClick={() => setStep(1)}>
-                  Back
-                </Button>
-                <Button type="submit" className="flex-1" disabled={loading}>
-                  {loading ? 'Creating...' : 'Create Account'}
-                </Button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Full Name
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
+                  placeholder="John Kamau"
+                />
               </div>
             </div>
-          )}
-        </form>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
+                  placeholder="john@example.com"
+                />
+              </div>
+            </div>
+
+            <Button type="button" className="w-full" onClick={() => setStep(2)}>
+              Continue
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6 fade-in">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Phone Number (MPesa)
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
+                  placeholder="+254 712 345 678"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
+                  placeholder="Create a strong password"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <input type="checkbox" required className="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+              <label className="text-sm text-gray-600 dark:text-gray-400">
+                I agree to the <Link href="#" className="text-primary-600 hover:underline">Terms of Service</Link> and <Link href="#" className="text-primary-600 hover:underline">Privacy Policy</Link>
+              </label>
+            </div>
+
+            <div className="flex gap-3">
+              <Button type="button" variant="secondary" className="flex-1" onClick={() => setStep(1)}>
+                Back
+              </Button>
+              <Button type="submit" className="flex-1" disabled={loading}>
+                {loading ? 'Creating...' : 'Create Account'}
+              </Button>
+            </div>
+          </form>
+        )}
 
         <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
           Already have an account?{' '}
