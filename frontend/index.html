@@ -2661,9 +2661,15 @@
                     // Handle hash-based routing
                     const handleHashChange = () => {
                         const hash = window.location.hash.slice(1);
-                        if (hash) {
+                        if (hash && hash !== this.currentPage) {
                             this.currentPage = hash;
                         }
+                    };
+                    
+                    // Handle browser back/forward buttons
+                    const handlePopState = (event) => {
+                        const hash = window.location.hash.slice(1);
+                        this.currentPage = hash || 'landing';
                     };
                     
                     // Set initial page from hash or default to landing
@@ -2672,8 +2678,12 @@
                     
                     handleHashChange();
                     window.addEventListener('hashchange', handleHashChange);
+                    window.addEventListener('popstate', handlePopState);
                     
-                    return () => window.removeEventListener('hashchange', handleHashChange);
+                    return () => {
+                        window.removeEventListener('hashchange', handleHashChange);
+                        window.removeEventListener('popstate', handlePopState);
+                    };
                 },
                 
                 showPage(page) {
@@ -2681,7 +2691,9 @@
                     this.mobileMenuOpen = false;
                     
                     // Update URL hash for proper routing
-                    window.location.hash = page;
+                    if (window.location.hash !== '#' + page) {
+                        window.location.hash = page;
+                    }
                     
                     // Scroll to top
                     window.scrollTo(0, 0);
