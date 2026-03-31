@@ -2661,8 +2661,14 @@
                     // Handle hash-based routing
                     const handleHashChange = () => {
                         const hash = window.location.hash.slice(1);
-                        this.currentPage = hash;
+                        if (hash) {
+                            this.currentPage = hash;
+                        }
                     };
+                    
+                    // Set initial page from hash or default to landing
+                    const hash = window.location.hash.slice(1);
+                    this.currentPage = hash || 'landing';
                     
                     handleHashChange();
                     window.addEventListener('hashchange', handleHashChange);
@@ -2673,6 +2679,9 @@
                 showPage(page) {
                     this.currentPage = page;
                     this.mobileMenuOpen = false;
+                    
+                    // Update URL hash for proper routing
+                    window.location.hash = page;
                     
                     // Scroll to top
                     window.scrollTo(0, 0);
