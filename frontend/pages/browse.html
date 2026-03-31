@@ -1,0 +1,214 @@
+<!-- Browse Groups Page -->
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Browse Shipping Groups</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">Join existing groups and save money on your shipments today</p>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Filter Groups</h2>
+            <div class="grid md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">From</label>
+                    <select x-model="filters.from" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option>All Locations</option>
+                        <option>Nairobi CBD</option>
+                        <option>Westlands, Nairobi</option>
+                        <option>Thika</option>
+                        <option>Nakuru</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">To</label>
+                    <select x-model="filters.to" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option>All Destinations</option>
+                        <option>Mombasa</option>
+                        <option>Kisumu</option>
+                        <option>Nakuru</option>
+                        <option>Eldoret</option>
+                        <option>Malindi</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Package Type</label>
+                    <select x-model="filters.type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option>All Types</option>
+                        <option>Documents</option>
+                        <option>Clothing</option>
+                        <option>Electronics</option>
+                        <option>Food Items</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <select x-model="filters.status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option>All Status</option>
+                        <option>Open</option>
+                        <option>Filling Fast</option>
+                        <option>Closing Soon</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Groups Grid -->
+        <div class="grid md:grid-cols-3 gap-8 mb-8">
+            <template x-for="group in getFilteredGroups()" :key="group.id">
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <div class="flex items-center text-sm text-gray-500 mb-1">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span x-text="group.origin"></span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-arrow-down text-blue-500 mr-2"></i>
+                                <span class="font-bold text-gray-900" x-text="group.destination"></span>
+                            </div>
+                        </div>
+                        <span class="shipment-status" :class="group.status === 'closing' ? 'status-pending' : 'status-confirmed'" x-text="group.status === 'closing' ? 'Closing Soon' : 'Open'"></span>
+                    </div>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Spots left</span>
+                            <span class="font-medium text-gray-900" x-text="`${group.maxParticipants - group.participants} of ${group.maxParticipants}`"></span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Total weight</span>
+                            <span class="font-medium text-gray-900" x-text="group.totalWeight"></span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Closes in</span>
+                            <span class="font-medium text-amber-600" x-text="group.deadline"></span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Package Type</span>
+                            <span class="font-medium text-gray-900" x-text="group.packageType"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mb-6">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-600">Group Progress</span>
+                            <span class="font-medium text-gray-900" x-text="`${Math.round((group.participants / group.maxParticipants) * 100)}%`"></span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" :style="`width: ${(group.participants / group.maxParticipants) * 100}%`"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Current Members -->
+                    <div class="mb-6">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Current Members</h4>
+                        <div class="flex -space-x-2">
+                            <template x-for="i in group.participants" :key="i">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-xs border-2 border-white">
+                                    <span x-text="['JD', 'SK', 'WM', 'OK', 'AN'][i-1]"></span>
+                                </div>
+                            </template>
+                            <template x-for="i in (group.maxParticipants - group.participants)" :key="i">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs border-2 border-white">
+                                    <i class="fas fa-plus text-xs"></i>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-gray-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <div class="text-xs text-gray-500">You save</div>
+                                <div class="text-lg font-bold text-green-600" x-text="group.savings"></div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs text-gray-500">Your cost</div>
+                                <div class="text-lg font-bold text-blue-600">KES 1,200</div>
+                            </div>
+                        </div>
+                        <template x-if="!user">
+                            <button @click="showPage('signup')" class="w-full py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300">
+                                Sign Up to Join
+                            </button>
+                        </template>
+                        <template x-if="user">
+                            <button @click="joinGroup(group)" class="w-full py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition duration-300">
+                                Join This Group
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+        
+        <!-- No Results Message -->
+        <div x-show="getFilteredGroups().length === 0" class="text-center py-12">
+            <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">No groups found</h3>
+            <p class="text-gray-500">Try adjusting your filters to see more available groups</p>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="bg-blue-600 text-white rounded-xl p-8 mb-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold mb-6">Join the Savings Revolution</h2>
+                <div class="grid md:grid-cols-4 gap-8">
+                    <div>
+                        <div class="text-4xl font-bold mb-2">KES 2.5M+</div>
+                        <div class="text-blue-100">Saved by users</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold mb-2">15,000+</div>
+                        <div class="text-blue-100">Active users</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold mb-2">45,000+</div>
+                        <div class="text-blue-100">Shipments completed</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold mb-2">98%</div>
+                        <div class="text-blue-100">Success rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">How ShipShare Works</h2>
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-blue-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">1. Find Groups</h3>
+                    <p class="text-sm text-gray-600">Search for existing groups going to your destination</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-users text-green-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">2. Join Group</h3>
+                    <p class="text-sm text-gray-600">Join a group with others heading the same way</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-box text-amber-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">3. Ship Package</h3>
+                    <p class="text-sm text-gray-600">Send your package with the group shipment</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-piggy-bank text-purple-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">4. Save Money</h3>
+                    <p class="text-sm text-gray-600">Pay less and track your delivery</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,325 @@
+<!-- Pricing Page -->
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Transparent Pricing</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">Simple, affordable pricing with no hidden fees. Save up to 70% on shipping costs.</p>
+        </div>
+
+        <!-- Savings Calculator -->
+        <div class="bg-blue-600 text-white rounded-xl p-8 mb-16">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold mb-6">See How Much You Can Save</h2>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div>
+                        <div class="text-4xl font-bold mb-2">KES 3,500</div>
+                        <div class="text-blue-100">Regular Shipping Cost</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold mb-2">KES 1,200</div>
+                        <div class="text-blue-100">ShipShare Price</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold mb-2">KES 2,300</div>
+                        <div class="text-blue-100">Your Savings</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing Plans -->
+        <div class="grid md:grid-cols-3 gap-8 mb-16">
+            <!-- Individual Plan -->
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <div class="text-center">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Individual</h3>
+                    <div class="text-4xl font-bold text-gray-900 mb-4">KES 1,200</div>
+                    <p class="text-gray-600 mb-6">Per shipment (average)</p>
+                    <ul class="text-left space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Up to 10kg packages</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Real-time tracking</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Basic insurance</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Email support</span>
+                        </li>
+                    </ul>
+                    <button @click="showPage('signup')" class="w-full py-3 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition duration-300">
+                        Get Started
+                    </button>
+                </div>
+            </div>
+
+            <!-- Business Plan (Popular) -->
+            <div class="bg-blue-600 text-white rounded-xl shadow-lg p-8 transform scale-105">
+                <div class="text-center">
+                    <div class="bg-amber-400 text-blue-900 text-sm font-bold px-3 py-1 rounded-full mb-4">MOST POPULAR</div>
+                    <h3 class="text-xl font-bold mb-2">Business</h3>
+                    <div class="text-4xl font-bold mb-4">KES 2,500</div>
+                    <p class="text-blue-100 mb-6">Per shipment (average)</p>
+                    <ul class="text-left space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-white mr-3"></i>
+                            <span>Up to 50kg packages</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-white mr-3"></i>
+                            <span>Priority tracking</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-white mr-3"></i>
+                            <span>Full insurance (KES 50,000)</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-white mr-3"></i>
+                            <span>24/7 phone support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-white mr-3"></i>
+                            <span>Monthly billing option</span>
+                        </li>
+                    </ul>
+                    <button @click="showPage('signup')" class="w-full py-3 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100 transition duration-300">
+                        Start Free Trial
+                    </button>
+                </div>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <div class="text-center">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Enterprise</h3>
+                    <div class="text-4xl font-bold text-gray-900 mb-4">Custom</div>
+                    <p class="text-gray-600 mb-6">Tailored pricing</p>
+                    <ul class="text-left space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Unlimited weight</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>API access</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Dedicated account manager</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Custom insurance</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Volume discounts</span>
+                        </li>
+                    </ul>
+                    <button @click="showPage('contact')" class="w-full py-3 bg-gray-900 text-white font-bold rounded-lg hover:bg-gray-800 transition duration-300">
+                        Contact Sales
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Route Pricing Table -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-16">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">Popular Routes Pricing</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-4 font-semibold text-gray-900">Route</th>
+                            <th class="text-center py-3 px-4 font-semibold text-gray-900">Regular Price</th>
+                            <th class="text-center py-3 px-4 font-semibold text-gray-900">ShipShare Price</th>
+                            <th class="text-center py-3 px-4 font-semibold text-gray-900">You Save</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-3 px-4">
+                                <div class="font-medium text-gray-900">Nairobi → Mombasa</div>
+                                <div class="text-sm text-gray-500">2-3 days</div>
+                            </td>
+                            <td class="text-center py-3 px-4">KES 3,500</td>
+                            <td class="text-center py-3 px-4 font-semibold text-green-600">KES 1,200</td>
+                            <td class="text-center py-3 px-4">
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-semibold">66% OFF</span>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-3 px-4">
+                                <div class="font-medium text-gray-900">Nairobi → Kisumu</div>
+                                <div class="text-sm text-gray-500">1-2 days</div>
+                            </td>
+                            <td class="text-center py-3 px-4">KES 2,800</td>
+                            <td class="text-center py-3 px-4 font-semibold text-green-600">KES 1,000</td>
+                            <td class="text-center py-3 px-4">
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-semibold">64% OFF</span>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-3 px-4">
+                                <div class="font-medium text-gray-900">Nairobi → Nakuru</div>
+                                <div class="text-sm text-gray-500">Same day</div>
+                            </td>
+                            <td class="text-center py-3 px-4">KES 1,800</td>
+                            <td class="text-center py-3 px-4 font-semibold text-green-600">KES 700</td>
+                            <td class="text-center py-3 px-4">
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-semibold">61% OFF</span>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-3 px-4">
+                                <div class="font-medium text-gray-900">Nairobi → Eldoret</div>
+                                <div class="text-sm text-gray-500">2-3 days</div>
+                            </td>
+                            <td class="text-center py-3 px-4">KES 3,200</td>
+                            <td class="text-center py-3 px-4 font-semibold text-green-600">KES 1,100</td>
+                            <td class="text-center py-3 px-4">
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-semibold">66% OFF</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4">
+                                <div class="font-medium text-gray-900">Mombasa → Kisumu</div>
+                                <div class="text-sm text-gray-500">3-4 days</div>
+                            </td>
+                            <td class="text-center py-3 px-4">KES 4,500</td>
+                            <td class="text-center py-3 px-4 font-semibold text-green-600">KES 1,600</td>
+                            <td class="text-center py-3 px-4">
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-semibold">64% OFF</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Features Comparison -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-16">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">Compare Features</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-4">Individual</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Package tracking</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Basic insurance</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Email support</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-times text-gray-400 mr-2"></i>
+                            <span class="text-gray-400">Priority support</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-times text-gray-400 mr-2"></i>
+                            <span class="text-gray-400">API access</span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-4">Business</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Priority tracking</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Full insurance</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>24/7 phone support</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Priority support</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-times text-gray-400 mr-2"></i>
+                            <span class="text-gray-400">API access</span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-4">Enterprise</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Custom tracking</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Custom insurance</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Dedicated support</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Priority support</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>API access</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">Pricing Questions</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="font-semibold text-gray-900 mb-3">How is pricing calculated?</h3>
+                    <p class="text-gray-600">Pricing is based on route distance, package weight, and group size. The more people in a group, the less everyone pays!</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="font-semibold text-gray-900 mb-3">Are there any hidden fees?</h3>
+                    <p class="text-gray-600">No! The price you see is the price you pay. No booking fees, no service charges, no surprises.</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="font-semibold text-gray-900 mb-3">Can I cancel my shipment?</h3>
+                    <p class="text-gray-600">Yes, you can cancel up to 2 hours before pickup for a full refund. After that, a 20% cancellation fee applies.</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="font-semibold text-gray-900 mb-3">Do you offer volume discounts?</h3>
+                    <p class="text-gray-600">Yes! Business and Enterprise plans offer significant volume discounts. Contact our sales team for custom pricing.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Start Saving Today</h2>
+            <p class="text-xl text-gray-600 mb-8">Join thousands of Kenyans saving up to 70% on shipping costs</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button @click="showPage('signup')" class="px-8 py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300 text-lg">
+                    Sign Up Now
+                </button>
+                <button @click="showPage('browse')" class="px-8 py-4 border border-blue-600 text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition duration-300 text-lg">
+                    Browse Groups
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
