@@ -1,13 +1,16 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 
-const inter = Inter({ subsets: ['latin'] });
+const plusJakartaSans = Plus_Jakarta_Sans({ 
+  subsets: ['latin'],
+  variable: '--font-plus-jakarta',
+});
 
 export const metadata: Metadata = {
   title: 'ShipShare Kenya - Save Money by Shipping Together',
-  description: 'Group shipping platform for Kenya. Combine shipments and save up to 40% on shipping costs.',
+  description: 'Group shipping platform for Kenya. Combine shipments and save up to 60% on shipping costs.',
 };
 
 export default function RootLayout({
@@ -16,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark:bg-slate-900">
-      <body className={inter.className}>
+    <html lang="en">
+      <body className={plusJakartaSans.className}>
         <AuthProvider>
           {children}
         </AuthProvider>

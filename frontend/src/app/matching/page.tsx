@@ -7,80 +7,158 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { mockMatches, mockGroups } from '@/utils/mockData';
 import { Modal } from '@/components/ui/Modal';
+import { Input } from '@/components/ui/Input';
+
+const SHIPPING_GROUPS = [
+  {
+    id: 'grp-001',
+    origin: 'Nairobi, CBD',
+    destination: 'Mombasa, CBD',
+    participants: 3,
+    maxParticipants: 5,
+    totalWeight: '12.5 kg',
+    soloCost: 2500,
+    groupCost: 1500,
+    savingsPercent: 40,
+    departureDate: 'Apr 5, 2024',
+    daysLeft: 2,
+    status: 'open',
+    provider: 'G4S Logistics',
+  },
+  {
+    id: 'grp-002',
+    origin: 'Nairobi, Westlands',
+    destination: 'Nakuru, Town',
+    participants: 2,
+    maxParticipants: 4,
+    totalWeight: '8.0 kg',
+    soloCost: 1200,
+    groupCost: 780,
+    savingsPercent: 35,
+    departureDate: 'Apr 6, 2024',
+    daysLeft: 3,
+    status: 'open',
+    provider: 'FedEx Kenya',
+  },
+  {
+    id: 'grp-003',
+    origin: 'Nairobi, Kilimani',
+    destination: 'Eldoret, CBD',
+    participants: 4,
+    maxParticipants: 4,
+    totalWeight: '22.0 kg',
+    soloCost: 2800,
+    groupCost: 1540,
+    savingsPercent: 45,
+    departureDate: 'Apr 7, 2024',
+    daysLeft: 1,
+    status: 'closing',
+    provider: 'DHL Kenya',
+  },
+  {
+    id: 'grp-004',
+    origin: 'Mombasa, CBD',
+    destination: 'Nairobi, CBD',
+    participants: 2,
+    maxParticipants: 6,
+    totalWeight: '15.0 kg',
+    soloCost: 2200,
+    groupCost: 1100,
+    savingsPercent: 50,
+    departureDate: 'Apr 8, 2024',
+    daysLeft: 4,
+    status: 'open',
+    provider: 'G4S Logistics',
+  },
+];
 
 export default function MatchingPage() {
-  const [selectedMatch, setSelectedMatch] = useState<any>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<typeof SHIPPING_GROUPS[0] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const handleJoinGroup = (match: any) => {
-    setSelectedMatch(match);
+  const handleJoinGroup = (group: typeof SHIPPING_GROUPS[0]) => {
+    setSelectedGroup(group);
     setIsModalOpen(true);
   };
 
   const confirmJoin = () => {
-    alert(`You've joined the group to ${selectedMatch.destination}!`);
+    alert(`You've joined the group to ${selectedGroup?.destination}!`);
     setIsModalOpen(false);
   };
 
-  const allGroups = [...mockMatches, ...mockGroups];
+  const filteredGroups = SHIPPING_GROUPS.filter(
+    (group) =>
+      group.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      group.origin.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-surface-50">
       <Navbar />
       <div className="flex">
-        <Sidebar />
-        <main className="flex-1 p-6 fade-in">
-          <div className="max-w-7xl mx-auto">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        
+        <main className="flex-1 pt-16 lg:pt-20 fade-in">
+          <div className="p-6 lg:p-8 max-w-7xl mx-auto">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-2xl lg:text-3xl font-bold text-surface-900">
                   Find Shipping Groups
                 </h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  Join groups going your way and save up to 40%
+                <p className="text-surface-500 mt-1">
+                  Join groups going your way and save up to 50%
                 </p>
               </div>
-              <div className="bg-accent-50 dark:bg-accent-900/20 rounded-lg p-4 flex items-center gap-3 border border-accent-100 dark:border-accent-900/30">
-                <TrendingDown className="w-6 h-6 text-accent-600" />
-                <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Your potential savings</div>
-                  <div className="text-lg font-bold text-accent-700 dark:text-accent-400">KES 5,800+</div>
+              
+              {/* Savings Card */}
+              <Card className="p-4 bg-gradient-to-r from-accent-50 to-primary-50 border-accent-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-accent-100 rounded-xl flex items-center justify-center text-accent-600">
+                    <TrendingDown className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-surface-500">Your potential savings</div>
+                    <div className="text-xl font-bold text-accent-600">KES 5,800+</div>
+                  </div>
                 </div>
-              </div>
+              </Card>
             </div>
 
             {/* Filters */}
             <Card className="mb-8 p-4">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
                   <input
                     type="text"
-                    placeholder="Search by destination..."
+                    placeholder="Search by destination or origin..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
+                    className="input-field pl-10"
                   />
                 </div>
-                <div className="flex gap-2 flex-wrap">
-                  <select className="px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg text-sm dark:bg-slate-800 dark:text-white">
+                <div className="flex gap-3 flex-wrap">
+                  <select className="px-4 py-2.5 border border-surface-200 rounded-lg text-sm bg-white text-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
                     <option>All Destinations</option>
                     <option>Nairobi</option>
                     <option>Mombasa</option>
                     <option>Kisumu</option>
+                    <option>Nakuru</option>
+                    <option>Eldoret</option>
                   </select>
-                  <select className="px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg text-sm dark:bg-slate-800 dark:text-white">
+                  <select className="px-4 py-2.5 border border-surface-200 rounded-lg text-sm bg-white text-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
                     <option>Any Time</option>
                     <option>Today</option>
                     <option>Tomorrow</option>
                     <option>This Week</option>
                   </select>
-                  <Button variant="secondary">
-                    <Filter className="h-4 w-4" />
+                  <Button variant="secondary" className="gap-2">
+                    <Filter className="w-4 h-4" />
+                    More Filters
                   </Button>
                 </div>
               </div>
@@ -88,67 +166,82 @@ export default function MatchingPage() {
 
             {/* Results */}
             <div className="space-y-4">
-              {allGroups.map((group) => (
-                <Card key={group.id} className="p-6 hover:shadow-md transition-shadow">
+              {filteredGroups.map((group) => (
+                <Card key={group.id} hover className="p-6">
                   <div className="flex flex-col lg:flex-row gap-6">
-                    {/* Left - Route */}
+                    {/* Left - Route Info */}
                     <div className="flex-1">
-                      <div className="flex items-start gap-3 mb-4">
-                        <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center text-primary-600 dark:text-primary-400 flex-shrink-0">
-                          <MapPin className="h-6 w-6" />
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 shrink-0">
+                          <MapPin className="w-7 h-7" />
                         </div>
                         <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{group.origin}</h3>
-                            <ArrowRight className="h-4 w-4 text-gray-400" />
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{group.destination}</h3>
+                          <div className="flex items-center gap-2 flex-wrap mb-2">
+                            <h3 className="text-lg font-semibold text-surface-900">{group.origin}</h3>
+                            <ArrowRight className="w-4 h-4 text-surface-400" />
+                            <h3 className="text-lg font-semibold text-surface-900">{group.destination}</h3>
                           </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant={group.status === 'closing' ? 'warning' : 'accent'}>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant={group.status === 'closing' ? 'warning' : 'primary'}>
                               {group.status === 'closing' ? 'Closing Soon' : 'Accepting Members'}
                             </Badge>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">ID: {group.id}</span>
+                            <span className="text-sm text-surface-500">ID: {group.id}</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
-                          <div className="text-gray-500 dark:text-gray-400 text-xs mb-1">Members</div>
-                          <div className="flex items-center gap-1 text-gray-900 dark:text-white">
-                            <Users className="h-4 w-4 text-primary-500" />
-                            <span className="font-medium">{group.participants}/{group.maxParticipants}</span>
+                          <div className="text-surface-500 text-xs mb-1">Members</div>
+                          <div className="flex items-center gap-2 text-surface-900 font-medium">
+                            <Users className="w-4 h-4 text-primary-500" />
+                            <span>{group.participants}/{group.maxParticipants}</span>
                           </div>
                         </div>
                         <div>
-                          <div className="text-gray-500 dark:text-gray-400 text-xs mb-1">Total Weight</div>
-                          <div className="text-gray-900 dark:text-white font-medium">{group.totalWeight}</div>
+                          <div className="text-surface-500 text-xs mb-1">Total Weight</div>
+                          <div className="text-surface-900 font-medium">{group.totalWeight}</div>
                         </div>
                         <div>
-                          <div className="text-gray-500 dark:text-gray-400 text-xs mb-1">Departure</div>
-                          <div className="flex items-center gap-1 text-gray-900 dark:text-white">
-                            <Calendar className="h-4 w-4 text-primary-500" />
-                            <span className="font-medium">{group.deadline || 'In 2 days'}</span>
+                          <div className="text-surface-500 text-xs mb-1">Departure</div>
+                          <div className="flex items-center gap-2 text-surface-900 font-medium">
+                            <Calendar className="w-4 h-4 text-primary-500" />
+                            <span>{group.departureDate}</span>
                           </div>
                         </div>
                         <div>
-                          <div className="text-gray-500 dark:text-gray-400 text-xs mb-1">Provider</div>
-                          <div className="text-gray-900 dark:text-white font-medium">G4S Logistics</div>
+                          <div className="text-surface-500 text-xs mb-1">Provider</div>
+                          <div className="text-surface-900 font-medium">{group.provider}</div>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="mt-4">
+                        <div className="flex justify-between text-xs text-surface-500 mb-1">
+                          <span>{group.participants} joined</span>
+                          <span>{group.maxParticipants - group.participants} spots left</span>
+                        </div>
+                        <div className="w-full bg-surface-100 rounded-full h-2">
+                          <div
+                            className="gradient-bg h-2 rounded-full transition-all"
+                            style={{ width: `${(group.participants / group.maxParticipants) * 100}%` }}
+                          />
                         </div>
                       </div>
                     </div>
 
-                    {/* Right - Pricing & CTA */}
-                    <div className="lg:w-64 flex flex-col justify-center lg:border-l border-gray-200 dark:border-slate-700 lg:pl-6">
-                      <div className="mb-4">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Solo shipping</div>
-                        <div className="text-lg text-gray-400 line-through">KES {group.estimatedCost || '2,500'}</div>
+                    {/* Right - Pricing */}
+                    <div className="lg:w-64 flex flex-col justify-center lg:border-l border-surface-100 lg:pl-6">
+                      <div className="mb-2">
+                        <div className="text-sm text-surface-500">Solo shipping</div>
+                        <div className="text-lg text-surface-400 line-through">KES {group.soloCost.toLocaleString()}</div>
                       </div>
                       <div className="mb-4">
-                        <div className="text-sm text-accent-600 dark:text-accent-400 font-medium">With this group</div>
-                        <div className="text-2xl font-bold text-accent-700 dark:text-accent-400">
-                          KES {Math.round((group.estimatedCost || 2500) * 0.6).toLocaleString()}
+                        <div className="text-sm text-accent-600 font-medium">With this group</div>
+                        <div className="text-3xl font-bold text-accent-600">
+                          KES {group.groupCost.toLocaleString()}
                         </div>
+                        <div className="text-sm text-surface-500">Save {group.savingsPercent}%</div>
                       </div>
                       <Button onClick={() => handleJoinGroup(group)} className="w-full">
                         Join Group
@@ -159,64 +252,96 @@ export default function MatchingPage() {
               ))}
             </div>
 
+            {/* Empty State */}
+            {filteredGroups.length === 0 && (
+              <Card className="p-12 text-center">
+                <MapPin className="w-12 h-12 text-surface-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-surface-900 mb-2">No groups found</h3>
+                <p className="text-surface-500 mb-6">
+                  Try adjusting your search or create a new group
+                </p>
+                <Button>Create New Group</Button>
+              </Card>
+            )}
+
             {/* Create Group CTA */}
-            <div className="mt-8 bg-primary-50 dark:bg-primary-900/20 rounded-xl p-6 border border-primary-100 dark:border-primary-900/30">
+            <div className="mt-8 bg-gradient-to-r from-primary-50 to-secondary-50 rounded-xl p-6 border border-primary-100">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/50 rounded-lg flex items-center justify-center text-primary-600 dark:text-primary-400">
-                    <PlusCircle className="w-6 h-6" />
+                  <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center text-primary-600 shadow-card">
+                    <PlusCircle className="w-7 h-7" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Can't find a match?</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Create your own group and invite others to join</p>
+                    <h3 className="font-semibold text-surface-900">Can&apos;t find a match?</h3>
+                    <p className="text-sm text-surface-600">
+                      Create your own group and invite others to join
+                    </p>
                   </div>
                 </div>
-                <Button variant="outline">Create New Group</Button>
+                <Button variant="secondary">Create New Group</Button>
               </div>
             </div>
           </div>
         </main>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Join Shipping Group">
-        <div className="space-y-4">
-          <div className="bg-accent-50 dark:bg-accent-900/20 rounded-lg p-4 border border-accent-100 dark:border-accent-900/30">
-            <div className="text-center">
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">You'll save approximately</div>
-              <div className="text-3xl font-bold text-accent-700 dark:text-accent-400">
-                KES {selectedMatch?.estimatedSavings || '1,000'}
+      {/* Join Group Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Join Shipping Group"
+      >
+        {selectedGroup && (
+          <div className="space-y-6">
+            {/* Savings Preview */}
+            <div className="bg-gradient-to-r from-accent-50 to-primary-50 rounded-xl p-4 border border-accent-100">
+              <div className="text-center">
+                <div className="text-sm text-surface-600 mb-1">You&apos;ll save approximately</div>
+                <div className="text-4xl font-bold gradient-text">
+                  KES {(selectedGroup.soloCost - selectedGroup.groupCost).toLocaleString()}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between py-2 border-b border-gray-100 dark:border-slate-700">
-              <span className="text-gray-600 dark:text-gray-400">Route</span>
-              <span className="font-medium text-gray-900 dark:text-white">{selectedMatch?.origin || 'Nairobi'} &rarr; {selectedMatch?.destination}</span>
+            {/* Group Details */}
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between py-2 border-b border-surface-100">
+                <span className="text-surface-500">Route</span>
+                <span className="font-medium text-surface-900">
+                  {selectedGroup.origin} → {selectedGroup.destination}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-surface-100">
+                <span className="text-surface-500">Group size</span>
+                <span className="font-medium text-surface-900">
+                  {selectedGroup.participants}/{selectedGroup.maxParticipants} members
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-surface-100">
+                <span className="text-surface-500">Departure</span>
+                <span className="font-medium text-surface-900">{selectedGroup.departureDate}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-surface-500">Provider</span>
+                <span className="font-medium text-surface-900">{selectedGroup.provider}</span>
+              </div>
             </div>
-            <div className="flex justify-between py-2 border-b border-gray-100 dark:border-slate-700">
-              <span className="text-gray-600 dark:text-gray-400">Group size</span>
-              <span className="font-medium text-gray-900 dark:text-white">{selectedMatch?.participants || 4} members</span>
-            </div>
-            <div className="flex justify-between py-2">
-              <span className="text-gray-600 dark:text-gray-400">Departure</span>
-              <span className="font-medium text-gray-900 dark:text-white">{selectedMatch?.deadline || 'In 2 days'}</span>
+
+            <p className="text-sm text-surface-600">
+              By joining, you&apos;ll share shipping costs with other members. Payment will be 
+              collected via M-Pesa once the group is full.
+            </p>
+
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => setIsModalOpen(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={confirmJoin} className="flex-1">
+                Confirm & Join
+              </Button>
             </div>
           </div>
-
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            By joining, you'll share shipping costs with other members. Payment will be collected via MPesa once the group is full.
-          </p>
-
-          <div className="flex gap-3 pt-2">
-            <Button variant="secondary" onClick={() => setIsModalOpen(false)} className="flex-1">
-              Cancel
-            </Button>
-            <Button onClick={confirmJoin} className="flex-1">
-              Confirm & Join
-            </Button>
-          </div>
-        </div>
+        )}
       </Modal>
     </div>
   );
