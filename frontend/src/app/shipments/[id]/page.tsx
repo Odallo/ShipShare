@@ -125,9 +125,9 @@ export default function ShipmentDetailsPage() {
                       </div>
                       <div className="flex justify-between items-center pt-2">
                         <span className="font-semibold text-lg">Your Cost with Group</span>
-                        <span className="font-bold text-2xl text-green-600">
-                          KES {group.estimatedCostPerUser}
-                        </span>
+<span className="font-bold text-2xl text-green-600">
+                  KES {Math.round(shipment.estimatedCost * (1 - group.savingsPercentage / 100))}
+                </span>
                       </div>
                     </>
                   )}

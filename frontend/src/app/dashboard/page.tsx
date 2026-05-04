@@ -165,7 +165,7 @@ export default function DashboardPage() {
                         {group.destination}
                       </div>
                       <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                        <span>{group.participants}/{group.maxParticipants} members</span>
+                        <span>{group.participants.length} members</span>
                         <span className="text-accent-600 dark:text-accent-400">2 days left</span>
                       </div>
                     </Card>

@@ -10,15 +10,25 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignupPage() {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    userType: 'individual',
-    businessName: '',
-    businessRegistration: '',
-  });
+type UserType = 'individual' | 'business';
+
+const [formData, setFormData] = useState<{
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  userType: UserType;
+  businessName: string;
+  businessRegistration: string;
+}>({
+  name: '',
+  email: '',
+  phone: '',
+  password: '',
+  userType: 'individual',
+  businessName: '',
+  businessRegistration: '',
+});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -85,7 +95,7 @@ export default function SignupPage() {
             <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
-                onClick={() => setFormData({...formData, userType: 'individual'})}
+                onClick={() => setFormData({...formData, userType: 'individual' as UserType})}
                 className={`p-4 rounded-lg border-2 text-center transition-all ${formData.userType === 'individual' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300'}`}
               >
                 <User className="w-8 h-8 mx-auto mb-2 text-primary-600" />
@@ -94,7 +104,7 @@ export default function SignupPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setFormData({...formData, userType: 'business'})}
+                onClick={() => setFormData({...formData, userType: 'business' as UserType})}
                 className={`p-4 rounded-lg border-2 text-center transition-all ${formData.userType === 'business' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300'}`}
               >
                 <Building2 className="w-8 h-8 mx-auto mb-2 text-primary-600" />

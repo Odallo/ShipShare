@@ -27,23 +27,31 @@ export interface Shipment {
 
 export interface ShipmentGroup {
   id: string;
+  origin: string;
   destination: string;
   participants: string[]; // user IDs
   shipments: string[]; // shipment IDs
   totalWeight: number;
-  estimatedCostPerUser: number;
-  status: 'forming' | 'confirmed' | 'shipping' | 'completed';
+  estimatedCost: number;
+  maxParticipants: number;
+  status: 'forming' | 'confirmed' | 'shipping' | 'completed' | 'open' | 'closing';
   departureDate: Date;
   savingsPercentage: number;
+  deadline?: string;
 }
 
 export interface Match {
   id: string;
   groupId: string;
+  origin: string;
   destination: string;
   participants: number;
+  maxParticipants: number;
   totalWeight: number;
   estimatedSavings: number;
+  estimatedCost: number;
   distance: string;
   departureDate: Date;
+  deadline?: string;
+  status?: 'open' | 'closing';
 }
