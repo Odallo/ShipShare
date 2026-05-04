@@ -1,39 +1,63 @@
 import React from 'react';
-import clsx from 'clsx';
+import { cn } from '@/lib/utils';
 
-interface CardProps {
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  className?: string;
-  onClick?: () => void;
+  variant?: 'default' | 'elevated' | 'outline' | 'gradient';
+  hover?: boolean;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className, onClick }) => {
-  return (
-    <div
-      className={clsx(
-        'bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow duration-200',
-        onClick && 'cursor-pointer',
-        className
-      )}
-      onClick={onClick}
-    >
-      {children}
-    </div>
-  );
-};
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, children, variant = 'default', hover = false, ...props }, ref) => {
+    const variants = {
+      default: 'bg-white rounded-xl border border-surface-100 shadow-card',
+      elevated: 'bg-white rounded-xl border border-surface-100 shadow-card-hover',
+      outline: 'bg-white rounded-xl border border-surface-200',
+      gradient: 'bg-gradient-to-br from-primary-50 to-secondary-50 rounded-xl border border-primary-100',
+    };
 
-export const CardHeader: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
-  <div className={clsx('p-6 pb-4 border-b border-gray-200 dark:border-slate-700', className)}>
+    const hoverStyles = hover ? 'transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover cursor-pointer' : '';
+
+    return (
+      <div
+        ref={ref}
+        className={cn(variants[variant], hoverStyles, className)}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+Card.displayName = 'Card';
+
+interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+}
+
+export const CardHeader: React.FC<CardHeaderProps> = ({ className, children, ...props }) => (
+  <div className={cn('px-6 py-4 border-b border-surface-100', className)} {...props}>
     {children}
   </div>
 );
 
-export const CardContent: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
-  <div className={clsx('p-6', className)}>{children}</div>
+interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+}
+
+export const CardContent: React.FC<CardContentProps> = ({ className, children, ...props }) => (
+  <div className={cn('px-6 py-4', className)} {...props}>
+    {children}
+  </div>
 );
 
-export const CardFooter: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
-  <div className={clsx('p-6 pt-4 border-t border-gray-200 dark:border-slate-700', className)}>
+interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+}
+
+export const CardFooter: React.FC<CardFooterProps> = ({ className, children, ...props }) => (
+  <div className={cn('px-6 py-4 border-t border-surface-100', className)} {...props}>
     {children}
   </div>
 );
