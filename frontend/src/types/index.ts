@@ -5,6 +5,9 @@ export interface User {
   phone: string;
   location: string;
   joinDate: Date;
+  userType?: 'individual' | 'business';
+  businessName?: string;
+  businessRegistration?: string;
 }
 
 export interface Shipment {

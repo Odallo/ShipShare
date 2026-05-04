@@ -58,7 +58,7 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Total Saved</p>
-                    <p className="text-2xl font-bold text-accent-600 dark:text-accent-400">KES {stats.totalSaved.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-accent-600 dark:text-accent-400">KES {stats.totalSaved.toLocaleString('en-US')}</p>
                   </div>
                   <div className="w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-lg flex items-center justify-center text-accent-600 dark:text-accent-400">
                     <TrendingDown className="w-6 h-6" />

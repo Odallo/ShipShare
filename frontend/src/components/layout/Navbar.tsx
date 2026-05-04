@@ -23,6 +23,12 @@ export const Navbar: React.FC = () => {
     { name: 'Create Shipment', href: '/shipments/create' },
     { name: 'Find Groups', href: '/matching' },
   ];
+
+  const landingNavigation = [
+    { name: 'How It Works', href: '/#how-it-works' },
+    { name: 'Popular Routes', href: '/#popular-routes' },
+    { name: 'Testimonials', href: '/#testimonials' },
+  ];
   
   return (
     <nav className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-40">
@@ -66,6 +72,15 @@ export const Navbar: React.FC = () => {
               </>
             ) : (
               <>
+                {landingNavigation.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    {item.name}
+                  </a>
+                ))}
                 <Link href="/auth/login">
                   <Button variant="outline" size="sm">Login</Button>
                 </Link>
@@ -114,6 +129,16 @@ export const Navbar: React.FC = () => {
               </>
             ) : (
               <>
+                {landingNavigation.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.name}
+                  </a>
+                ))}
                 <Link href="/auth/login" onClick={() => setIsMenuOpen(false)}>
                   <Button variant="outline" size="sm" fullWidth>Login</Button>
                 </Link>

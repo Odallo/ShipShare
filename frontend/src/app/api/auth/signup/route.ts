@@ -7,6 +7,9 @@ interface SignupRequest {
   phone: string;
   password: string;
   location?: string;
+  userType?: 'individual' | 'business';
+  businessName?: string;
+  businessRegistration?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -42,6 +45,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate business fields if business signup
+    if (body.userType === 'business') {
+      if (!body.businessName || !body.businessRegistration) {
+        return NextResponse.json(
+          { error: 'Business name and registration number are required for business accounts' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Create new user
     const newUser = {
       id: Math.random().toString(36).substr(2, 9),
@@ -50,6 +63,9 @@ export async function POST(request: NextRequest) {
       phone: body.phone,
       location: body.location || '',
       joinDate: new Date(),
+      userType: body.userType || 'individual',
+      businessName: body.businessName,
+      businessRegistration: body.businessRegistration,
     };
 
     // Set authentication cookie server-side
@@ -73,3 +89,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

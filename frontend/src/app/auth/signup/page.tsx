@@ -16,6 +16,8 @@ export default function SignupPage() {
     phone: '',
     password: '',
     userType: 'individual',
+    businessName: '',
+    businessRegistration: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -32,6 +34,9 @@ export default function SignupPage() {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
+        userType: formData.userType,
+        businessName: formData.businessName,
+        businessRegistration: formData.businessRegistration,
       });
       if (success) {
         router.push('/dashboard');
@@ -150,6 +155,56 @@ export default function SignupPage() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6 fade-in">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
+              {formData.userType === 'business' ? (
+                <>
+                  <Building2 className="w-5 h-5 text-primary-600" />
+                  <span className="text-sm font-medium text-primary-700 dark:text-primary-300">Creating a Business Account</span>
+                </>
+              ) : (
+                <>
+                  <User className="w-5 h-5 text-primary-600" />
+                  <span className="text-sm font-medium text-primary-700 dark:text-primary-300">Creating an Individual Account</span>
+                </>
+              )}
+            </div>
+
+            {/* Business-specific fields */}
+            {formData.userType === 'business' && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Business Name
+                  </label>
+                  <div className="relative">
+                    <Building2 className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={formData.businessName}
+                      onChange={(e) => setFormData({...formData, businessName: e.target.value})}
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
+                      placeholder="Your Business Name"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Business Registration Number
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.businessRegistration}
+                    onChange={(e) => setFormData({...formData, businessRegistration: e.target.value})}
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-slate-800 dark:text-white"
+                    placeholder="Registration number"
+                    required
+                  />
+                </div>
+              </>
+            )}
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Phone Number (MPesa)

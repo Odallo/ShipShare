@@ -9,6 +9,9 @@ interface SignupData {
   phone: string;
   password: string;
   location?: string;
+  userType?: 'individual' | 'business';
+  businessName?: string;
+  businessRegistration?: string;
 }
 
 interface AuthContextType {

@@ -169,7 +169,7 @@ export default function LandingPage() {
         </div>
 
         {/* How it Works */}
-        <div className="py-24 bg-white dark:bg-slate-900">
+        <div id="how-it-works" className="py-24 bg-white dark:bg-slate-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">How ShipShare Works</h2>
@@ -201,7 +201,7 @@ export default function LandingPage() {
         </div>
 
         {/* Active Routes Preview */}
-        <div className="py-24 bg-gray-50 dark:bg-slate-800/50">
+        <div id="popular-routes" className="py-24 bg-gray-50 dark:bg-slate-800/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row justify-between items-end mb-12">
               <div>
@@ -267,7 +267,7 @@ export default function LandingPage() {
         </div>
 
         {/* Testimonials */}
-        <div className="py-24 bg-white dark:bg-slate-900">
+        <div id="testimonials" className="py-24 bg-white dark:bg-slate-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-16">
               Trusted by Kenyans Nationwide
