@@ -23,8 +23,18 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    // Mock login
+    // Mock login - store user in localStorage
     setTimeout(() => {
+      const mockUser = {
+        id: '1',
+        name: formData.email.split('@')[0],
+        email: formData.email,
+        phone: '+254 712 345 678',
+        location: 'Nairobi, Kenya',
+        joinDate: new Date(),
+        userType: 'individual',
+      };
+      localStorage.setItem('shipshare_user', JSON.stringify(mockUser));
       setLoading(false);
       router.push('/dashboard');
     }, 1000);
@@ -103,8 +113,8 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
+            <Button type="submit" className="w-full" size="lg" isLoading={loading}>
+              Sign In
             </Button>
           </form>
 

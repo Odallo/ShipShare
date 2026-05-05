@@ -41,6 +41,19 @@ export default function SignupPage() {
     setError('');
 
     setTimeout(() => {
+      // Store user in localStorage
+      const newUser = {
+        id: Date.now().toString(),
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        location: 'Nairobi, Kenya',
+        joinDate: new Date(),
+        userType: formData.userType,
+        businessName: formData.businessName || undefined,
+        businessRegistration: formData.businessRegistration || undefined,
+      };
+      localStorage.setItem('shipshare_user', JSON.stringify(newUser));
       setLoading(false);
       router.push('/dashboard');
     }, 1000);
@@ -238,8 +251,8 @@ export default function SignupPage() {
                 <Button type="button" variant="secondary" className="flex-1" onClick={() => setStep(1)}>
                   Back
                 </Button>
-                <Button type="submit" className="flex-1" disabled={loading}>
-                  {loading ? 'Creating...' : 'Create Account'}
+                <Button type="submit" className="flex-1" isLoading={loading}>
+                  Create Account
                 </Button>
               </div>
             </form>

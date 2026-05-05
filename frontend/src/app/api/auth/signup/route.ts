@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 interface SignupRequest {
   name: string;
   email: string;
@@ -16,7 +18,6 @@ export async function POST(request: NextRequest) {
   try {
     const body: SignupRequest = await request.json();
 
-    // Validate input
     if (!body.name || !body.email || !body.password || !body.phone) {
       return NextResponse.json(
         { error: 'Name, email, password, and phone are required' },
@@ -45,7 +46,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate business fields if business signup
     if (body.userType === 'business') {
       if (!body.businessName || !body.businessRegistration) {
         return NextResponse.json(
@@ -55,34 +55,41 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create new user
-    const newUser = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: body.name,
-      email: body.email,
-      phone: body.phone,
-      location: body.location || '',
-      joinDate: new Date(),
-      userType: body.userType || 'individual',
-      businessName: body.businessName,
-      businessRegistration: body.businessRegistration,
-    };
+    const response = await fetch(`${API_URL}/api/auth/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
 
-    // Set authentication cookie server-side
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json({ error: data.error }, { status: response.status });
+    }
+
     const cookieStore = await cookies();
-    cookieStore.set('shipshare_user', JSON.stringify(newUser), {
-      httpOnly: false, // Set to false for localStorage compatibility
+    cookieStore.set('shipshare_user', JSON.stringify(data.user), {
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 86400, // 24 hours
+      maxAge: 86400,
+      path: '/',
+    });
+
+    cookieStore.set('shipshare_token', data.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 86400,
       path: '/',
     });
 
     return NextResponse.json(
-      { user: newUser, message: 'Signup successful' },
+      { user: data.user, message: data.message },
       { status: 201 }
     );
   } catch (error) {
+    console.error('Signup proxy error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

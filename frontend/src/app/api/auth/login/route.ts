@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 interface LoginRequest {
   email: string;
   password: string;
 }
 
-// Basic validation - in production, verify against database
-const VALID_CREDENTIALS = [
-  { email: 'demo@shipshare.com', password: 'password123' },
-  { email: 'test@example.com', password: 'test123' },
-];
-
 export async function POST(request: NextRequest) {
   try {
     const body: LoginRequest = await request.json();
 
-    // Validate input
     if (!body.email || !body.password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
@@ -31,43 +26,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check credentials (mock validation)
-    const isValidCredential = VALID_CREDENTIALS.some(
-      (cred) => cred.email === body.email && cred.password === body.password
-    );
+    const response = await fetch(`${API_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
 
-    if (!isValidCredential) {
-      return NextResponse.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
-      );
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json({ error: data.error }, { status: response.status });
     }
 
-    // Create mock user
-    const mockUser = {
-      id: '1',
-      name: 'John Odallo',
-      email: body.email,
-      phone: '+254 712 345 678',
-      location: 'Nairobi, CBD',
-      joinDate: new Date(),
-    };
-
-    // Set authentication cookie server-side
     const cookieStore = await cookies();
-    cookieStore.set('shipshare_user', JSON.stringify(mockUser), {
-      httpOnly: false, // Set to false for localStorage compatibility
+    cookieStore.set('shipshare_user', JSON.stringify(data.user), {
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 86400, // 24 hours
+      maxAge: 86400,
+      path: '/',
+    });
+
+    cookieStore.set('shipshare_token', data.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 86400,
       path: '/',
     });
 
     return NextResponse.json(
-      { user: mockUser, message: 'Login successful' },
+      { user: data.user, message: data.message },
       { status: 200 }
     );
   } catch (error) {
+    console.error('Login proxy error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
