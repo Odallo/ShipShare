@@ -23,21 +23,29 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    // Mock login - store user in localStorage
-    setTimeout(() => {
-      const mockUser = {
-        id: '1',
-        name: formData.email.split('@')[0],
-        email: formData.email,
-        phone: '+254 712 345 678',
-        location: 'Nairobi, Kenya',
-        joinDate: new Date(),
-        userType: 'individual',
-      };
-      localStorage.setItem('shipshare_user', JSON.stringify(mockUser));
-      setLoading(false);
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Login failed');
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem('shipshare_user', JSON.stringify(data.user));
+      localStorage.setItem('shipshare_token', data.token);
       router.push('/dashboard');
-    }, 1000);
+    } catch (err) {
+      setError('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

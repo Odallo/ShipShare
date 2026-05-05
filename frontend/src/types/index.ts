@@ -3,8 +3,9 @@ export interface User {
   name: string;
   email: string;
   phone: string;
-  location: string;
-  joinDate: Date;
+  location?: string;
+  createdAt: string;
+  updatedAt?: string;
   userType?: 'individual' | 'business';
   businessName?: string;
   businessRegistration?: string;

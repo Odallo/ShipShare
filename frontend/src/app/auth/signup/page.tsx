@@ -40,23 +40,29 @@ export default function SignupPage() {
     setLoading(true);
     setError('');
 
-    setTimeout(() => {
-      // Store user in localStorage
-      const newUser = {
-        id: Date.now().toString(),
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        location: 'Nairobi, Kenya',
-        joinDate: new Date(),
-        userType: formData.userType,
-        businessName: formData.businessName || undefined,
-        businessRegistration: formData.businessRegistration || undefined,
-      };
-      localStorage.setItem('shipshare_user', JSON.stringify(newUser));
-      setLoading(false);
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Signup failed');
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem('shipshare_user', JSON.stringify(data.user));
+      localStorage.setItem('shipshare_token', data.token);
       router.push('/dashboard');
-    }, 1000);
+    } catch (err) {
+      setError('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
