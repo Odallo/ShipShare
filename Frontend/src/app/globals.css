@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 249, 250, 251;
+  --background-end-rgb: 249, 250, 251;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+@layer components {
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent;
+  }
+
+  .gradient-bg {
+    @apply bg-gradient-to-r from-primary-500 to-secondary-500;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 rounded-lg border border-surface-200 bg-white text-surface-900 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+  }
+
+  .card-elevated {
+    @apply bg-white rounded-xl border border-surface-100 p-6 shadow-card;
+  }
+
+  .blob {
+    @apply absolute rounded-full filter blur-3xl opacity-20;
+  }
+
+  .blob-primary {
+    @apply bg-primary-500;
+  }
+
+  .blob-secondary {
+    @apply bg-secondary-500;
+  }
+
+  .isometric {
+    perspective: 1000px;
+  }
+
+  .isometric-card {
+    transform: rotateX(10deg) rotateY(-10deg);
+    transition: transform 0.3s ease;
+  }
+
+  .isometric-card:hover {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+}
+
+@layer utilities {
+  .fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
