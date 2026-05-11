@@ -1,116 +1,86 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Check, ArrowRight, Package, Truck, Zap, Users, Banknote, AlertTriangle } from 'lucide-react';
+import { Check, ArrowRight, Package, Truck, Zap, Users, Banknote, AlertTriangle, ShieldCheck, Scale, Info } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Footer } from '@/components/layout/Footer';
 import { Navbar } from '@/components/layout/Navbar';
 
-const PRICING_PLANS = [
-  {
-    name: 'Free',
-    description: 'Pay per shipment. Perfect for testing and occasional shippers.',
-    price: 0,
-    period: 'pay as you go',
-    platformFee: '10%',
-    icon: Package,
-    features: [
-      'Up to 10kg package weight',
-      'Standard shipping (3-5 days)',
-      'Join existing groups',
-      'Real-time tracking',
-      'KES 10,000 insurance',
-      'Email support',
-      'M-Pesa integration',
-    ],
-    cta: 'Start Free',
-    popular: true,
-  },
-  {
-    name: 'Pro',
-    description: 'Fixed monthly fee for frequent shippers. Save more with volume.',
-    price: 2000,
-    period: '/month',
-    platformFee: '5%',
-    icon: Truck,
-    features: [
-      'Up to 30kg package weight',
-      'Priority shipping (2-3 days)',
-      'Create unlimited groups',
-      'Real-time tracking',
-      'KES 25,000 insurance',
-      'Priority support',
-      'M-Pesa integration',
-      'SMS notifications',
-      'Dedicated account manager',
-    ],
-    cta: 'Go Pro',
-    popular: false,
-  },
-  {
-    name: 'Enterprise',
-    description: 'Custom pricing for high-volume businesses and logistics partners.',
-    price: 0,
-    period: 'custom',
-    platformFee: 'Negotiated',
-    icon: Zap,
-    features: [
-      'Unlimited package weight',
-      'Express shipping (24-48h)',
-      'Unlimited group creation',
-      'Advanced analytics dashboard',
-      'KES 100,000 insurance',
-      '24/7 phone support',
-      'Dedicated account manager',
-      'API access',
-      'Custom billing',
-      'White-label options',
-    ],
-    cta: 'Contact Sales',
-    popular: false,
-  },
+const WEIGHT_TIERS = [
+  { weight: 'Up to 5kg', solo: 1200, group: 720, guaranteed: 900 },
+  { weight: 'Up to 10kg', solo: 2000, group: 1200, guaranteed: 1500 },
+  { weight: 'Up to 15kg', solo: 2800, group: 1680, guaranteed: 2100 },
+  { weight: 'Up to 20kg', solo: 3500, group: 2100, guaranteed: 2600 },
+  { weight: 'Up to 30kg', solo: 4800, group: 2880, guaranteed: 3600 },
 ];
 
-const ROUTE_PRICING = [
-  { route: 'Nairobi → Mombasa (10kg)', solo: 2500, group: 1500, bus: 400, savings: '40%' },
-  { route: 'Nairobi → Kisumu (10kg)', solo: 2200, group: 1320, bus: 350, savings: '40%' },
-  { route: 'Nairobi → Nakuru (10kg)', solo: 1200, group: 720, bus: 300, savings: '40%' },
-  { route: 'Nairobi → Eldoret (10kg)', solo: 2800, group: 1540, bus: 350, savings: '45%' },
-  { route: 'Mombasa → Nairobi (10kg)', solo: 2200, group: 1100, bus: 400, savings: '50%' },
-  { route: 'Kisumu → Nairobi (10kg)', solo: 2400, group: 1440, bus: 350, savings: '40%' },
+const POPULAR_ROUTES = [
+  { route: 'Nairobi ↔ Mombasa', avgDays: '24-48h', partners: ['G4S', 'DHL', 'FedEx'] },
+  { route: 'Nairobi ↔ Kisumu', avgDays: '24-36h', partners: ['G4S', 'Sendy'] },
+  { route: 'Nairobi ↔ Nakuru', avgDays: '12-24h', partners: ['G4S', 'FedEx'] },
+  { route: 'Nairobi ↔ Eldoret', avgDays: '24-48h', partners: ['DHL', 'Sendy'] },
+  { route: 'Mombasa ↔ Kisumu', avgDays: '36-48h', partners: ['G4S'] },
+];
+
+const PRICE_TYPES = [
+  {
+    id: 'solo',
+    name: 'Solo Rate',
+    description: 'Ship alone with full premium service',
+    icon: Package,
+    color: 'surface',
+    savings: null,
+  },
+  {
+    id: 'group',
+    name: 'Group Rate',
+    description: 'Join others heading the same way',
+    icon: Users,
+    color: 'accent',
+    savings: '40-50%',
+  },
+  {
+    id: 'guaranteed',
+    name: 'Guaranteed Rate',
+    description: 'Ship now, pay group rate if group fills',
+    icon: ShieldCheck,
+    color: 'primary',
+    savings: '25-30%',
+  },
 ];
 
 const FAQ = [
   {
-    question: 'Is there a free trial?',
-    answer: 'Yes! The Free plan has no monthly fees. You only pay a 10% platform fee per shipment. No credit card required to start.',
+    question: 'How does the Guaranteed Rate work?',
+    answer: 'Pay the guaranteed rate upfront. If the group fills before departure, you get refunded the difference back to your M-Pesa. If the group doesn\'t fill, your shipment still departs at the guaranteed rate — no waiting.',
   },
   {
-    question: 'Can I cancel anytime?',
-    answer: 'Absolutely. Cancel your subscription at any time with no penalties or hidden fees.',
+    question: 'When do I pay?',
+    answer: 'Payment is collected via M-Pesa once your group is confirmed. For Guaranteed Rate, payment is collected immediately to secure your spot.',
   },
   {
     question: 'What happens if my package is lost or damaged?',
-    answer: 'All shipments are insured up to the plan limit. File a claim through your dashboard and we process it within 7 business days.',
+    answer: 'All shipments are insured up to KES 50,000. File a claim through your dashboard and we process it within 7 business days.',
   },
   {
-    question: 'Do you offer refunds?',
-    answer: 'We offer a full refund within 30 days of payment if you are not satisfied with our service.',
-  },
-  {
-    question: 'Can I upgrade or downgrade my plan?',
-    answer: 'Yes, you can change your plan at any time. Changes take effect on your next billing cycle.',
+    question: 'Can I cancel my shipment?',
+    answer: 'Yes, cancel for free up to 12 hours before departure. After that, a small cancellation fee applies.',
   },
   {
     question: 'Why is ShipShare more expensive than bus parcel?',
     answer: 'Bus parcel services are cheaper but don\'t include insurance, real-time tracking, door pickup/delivery, or accountability. ShipShare uses premium couriers (G4S, FedEx, DHL) with full insurance and tracking — at 40-60% less than going solo.',
   },
+  {
+    question: 'How do I join a group?',
+    answer: 'Create a shipment with your route and package details. We\'ll automatically match you with existing groups or create a new group for you to invite others.',
+  },
 ];
 
 export default function PricingPage() {
+  const [selectedWeight, setSelectedWeight] = useState(1);
   return (
     <>
       <Navbar />
@@ -141,14 +111,31 @@ export default function PricingPage() {
       </section>
 
       <section className="py-20 lg:py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {PRICING_PLANS.map((plan) => (
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-surface-900 mb-4">
+              Pay Per Shipment
+            </h2>
+            <p className="text-lg text-surface-600 max-w-2xl mx-auto">
+              No subscriptions. No monthly fees. Just pay for what you ship.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {PRICE_TYPES.map((type) => (
               <Card 
-                key={plan.name} 
-                className={`p-6 relative ${plan.popular ? 'ring-2 ring-primary-500 scale-105 z-10' : ''}`}
+                key={type.id} 
+                className={`p-6 relative ${
+                  type.id === 'group' ? 'ring-2 ring-accent-500' : 
+                  type.id === 'guaranteed' ? 'ring-2 ring-primary-500' : ''
+                }`}
               >
-                {plan.popular && (
+                {type.id === 'group' && (
+                  <Badge variant="accent" className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    Best Savings
+                  </Badge>
+                )}
+                {type.id === 'guaranteed' && (
                   <Badge variant="new" className="absolute -top-3 left-1/2 -translate-x-1/2">
                     Most Popular
                   </Badge>
@@ -156,57 +143,88 @@ export default function PricingPage() {
                 
                 <div className="text-center mb-6">
                   <div className={`w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center ${
-                    plan.popular ? 'gradient-bg text-white' : 'bg-surface-100 text-surface-600'
+                    type.id === 'group' ? 'bg-accent-100 text-accent-600' :
+                    type.id === 'guaranteed' ? 'gradient-bg text-white' :
+                    'bg-surface-100 text-surface-600'
                   }`}>
-                    <plan.icon className="w-7 h-7" />
+                    <type.icon className="w-7 h-7" />
                   </div>
-                  <h3 className="text-xl font-bold text-surface-900">{plan.name}</h3>
-                  <p className="text-surface-500 text-sm mt-1">{plan.description}</p>
-                </div>
-
-                <div className="text-center mb-6">
-                  {plan.price === 0 && plan.period === 'custom' ? (
-                    <div>
-                      <span className="text-3xl font-bold text-surface-900">Custom</span>
-                      <p className="text-sm text-surface-500 mt-1">Tailored to your needs</p>
-                    </div>
-                  ) : plan.price === 0 ? (
-                    <div>
-                      <span className="text-3xl font-bold text-surface-900">Free</span>
-                      <p className="text-sm text-surface-500 mt-1">No monthly fees</p>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="flex items-baseline justify-center gap-1">
-                        <span className="text-4xl font-bold text-surface-900">KES {plan.price.toLocaleString()}</span>
-                        <span className="text-surface-500">{plan.period}</span>
-                      </div>
-                    </div>
-                  )}
-                  {plan.platformFee && (
-                    <div className="mt-2">
-                      <Badge variant="accent">
-                        {plan.platformFee} per shipment
-                      </Badge>
+                  <h3 className="text-xl font-bold text-surface-900">{type.name}</h3>
+                  <p className="text-surface-500 text-sm mt-1">{type.description}</p>
+                  {type.savings && (
+                    <div className="mt-2 text-sm font-medium text-accent-600">
+                      Save {type.savings}
                     </div>
                   )}
                 </div>
 
-                <ul className="space-y-3 mb-6">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-sm">
-                      <Check className="w-5 h-5 text-accent-500 shrink-0 mt-0.5" />
-                      <span className="text-surface-600">{feature}</span>
-                    </li>
-                  ))}
+                <div className="text-center">
+                  <div className="text-sm text-surface-500 mb-1">Starting from</div>
+                  <div className="text-3xl font-bold text-surface-900">
+                    KES {type.id === 'solo' ? WEIGHT_TIERS[0].solo : 
+                        type.id === 'group' ? WEIGHT_TIERS[0].group : 
+                        WEIGHT_TIERS[0].guaranteed}
+                  </div>
+                  <div className="text-sm text-surface-400">per shipment</div>
+                </div>
+
+                <ul className="mt-6 space-y-2 text-sm">
+                  {type.id === 'solo' && (
+                    <>
+                      <li className="flex items-center gap-2 text-surface-600">
+                        <Check className="w-4 h-4 text-accent-500" /> Premium courier (G4S/DHL/FedEx)
+                      </li>
+                      <li className="flex items-center gap-2 text-surface-600">
+                        <Check className="w-4 h-4 text-accent-500" /> Door-to-door pickup & delivery
+                      </li>
+                      <li className="flex items-center gap-2 text-surface-600">
+                        <Check className="w-4 h-4 text-accent-500" /> Real-time GPS tracking
+                      </li>
+                      <li className="flex items-center gap-2 text-surface-600">
+                        <Check className="w-4 h-4 text-accent-500" /> KES 50,000 insurance
+                      </li>
+                    </>
+                  )}
+                  {type.id === 'group' && (
+                    <>
+                      <li className="flex items-center gap-2 text-surface-600">
+                        <Check className="w-4 h-4 text-accent-500" /> Everything in Solo Rate
+                      </li>
+                      <li className="flex items-center gap-2 text-surface-600">
+                        <Check className="w-4 h-4 text-accent-500" /> Split costs with others
+                      </li>
+                      <li className="flex items-center gap-2 text-surface-600">
+                        <Check className="w-4 h-4 text-accent-500" /> Best savings (40-50%)
+                      </li>
+                      <li className="flex items-center gap-2 text-surface-500">
+                        <Info className="w-4 h-4" /> Ships only if group fills
+                      </li>
+                    </>
+                  )}
+                  {type.id === 'guaranteed' && (
+                    <>
+                      <li className="flex items-center gap-2 text-surface-600">
+                        <Check className="w-4 h-4 text-accent-500" /> Everything in Group Rate
+                      </li>
+                      <li className="flex items-center gap-2 text-surface-600">
+                        <Check className="w-4 h-4 text-accent-500" /> Ship immediately
+                      </li>
+                      <li className="flex items-center gap-2 text-surface-600">
+                        <Check className="w-4 h-4 text-accent-500" /> Refund if group fills
+                      </li>
+                      <li className="flex items-center gap-2 text-surface-600">
+                        <Check className="w-4 h-4 text-accent-500" /> No waiting, guaranteed delivery
+                      </li>
+                    </>
+                  )}
                 </ul>
 
-                <Link href="/auth/signup">
+                <Link href="/auth/signup" className="block mt-6">
                   <Button 
                     className="w-full" 
-                    variant={plan.popular ? 'primary' : 'secondary'}
+                    variant={type.id === 'guaranteed' ? 'primary' : 'secondary'}
                   >
-                    {plan.cta}
+                    Get Started
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
@@ -259,59 +277,106 @@ export default function PricingPage() {
       </section>
 
       <section className="py-20 lg:py-32 bg-surface-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-surface-900 mb-4">
-              Route-Based Pricing
+              Weight-Based Pricing
             </h2>
             <p className="text-lg text-surface-600">
-              See how much you can save compared to solo premium courier rates
+              Choose your package size. All prices include insurance and tracking.
             </p>
           </div>
 
-          <Card className="overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-surface-50 border-b border-surface-100">
-                    <th className="text-left p-4 text-sm font-semibold text-surface-600">Route</th>
-                    <th className="text-right p-4 text-sm font-semibold text-surface-600">Solo Courier</th>
-                    <th className="text-right p-4 text-sm font-semibold text-surface-600">ShipShare Group</th>
-                    <th className="text-right p-4 text-sm font-semibold text-surface-600">Bus Parcel</th>
-                    <th className="text-right p-4 text-sm font-semibold text-surface-600">You Save</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ROUTE_PRICING.map((route, idx) => (
-                    <tr key={idx} className="border-b border-surface-50 last:border-0">
-                      <td className="p-4 font-medium text-surface-900">{route.route}</td>
-                      <td className="p-4 text-right text-surface-500 line-through">KES {route.solo.toLocaleString()}</td>
-                      <td className="p-4 text-right font-semibold text-accent-600">KES {route.group.toLocaleString()}</td>
-                      <td className="p-4 text-right text-surface-400">KES {route.bus.toLocaleString()}</td>
-                      <td className="p-4 text-right">
-                        <Badge variant="accent">{route.savings}</Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <Card className="p-6 mb-8">
+            <div className="flex items-center gap-2 mb-6">
+              <Scale className="w-5 h-5 text-primary-600" />
+              <span className="font-semibold text-surface-900">Select your package weight</span>
+            </div>
+            
+            <div className="flex flex-wrap gap-3 mb-8">
+              {WEIGHT_TIERS.map((tier, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedWeight(idx)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    selectedWeight === idx
+                      ? 'gradient-bg text-white'
+                      : 'bg-surface-100 text-surface-600 hover:bg-surface-200'
+                  }`}
+                >
+                  {tier.weight}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className={`p-4 rounded-xl border-2 ${
+                PRICE_TYPES[0].id === 'solo' ? 'border-surface-200 bg-white' : ''
+              }`}>
+                <div className="flex items-center gap-2 mb-3">
+                  <Package className="w-5 h-5 text-surface-500" />
+                  <span className="font-semibold text-surface-900">Solo Rate</span>
+                </div>
+                <div className="text-2xl font-bold text-surface-400 line-through mb-1">
+                  KES {WEIGHT_TIERS[selectedWeight].solo.toLocaleString()}
+                </div>
+                <div className="text-sm text-surface-500">Full premium service</div>
+              </div>
+              
+              <div className="p-4 rounded-xl border-2 border-accent-200 bg-accent-50">
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="w-5 h-5 text-accent-600" />
+                  <span className="font-semibold text-accent-700">Group Rate</span>
+                  <Badge variant="accent">Best</Badge>
+                </div>
+                <div className="text-3xl font-bold text-accent-600 mb-1">
+                  KES {WEIGHT_TIERS[selectedWeight].group.toLocaleString()}
+                </div>
+                <div className="text-sm text-accent-600">
+                  Save {Math.round((1 - WEIGHT_TIERS[selectedWeight].group / WEIGHT_TIERS[selectedWeight].solo) * 100)}% vs solo
+                </div>
+              </div>
+              
+              <div className="p-4 rounded-xl border-2 border-primary-200 bg-primary-50">
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldCheck className="w-5 h-5 text-primary-600" />
+                  <span className="font-semibold text-primary-700">Guaranteed</span>
+                </div>
+                <div className="text-3xl font-bold text-primary-600 mb-1">
+                  KES {WEIGHT_TIERS[selectedWeight].guaranteed.toLocaleString()}
+                </div>
+                <div className="text-sm text-primary-600">
+                  Ship now, refund if group fills
+                </div>
+              </div>
             </div>
           </Card>
 
-          <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="grid md:grid-cols-5 gap-4">
+            {POPULAR_ROUTES.map((route, idx) => (
+              <Card key={idx} className="p-4">
+                <div className="font-semibold text-surface-900 mb-1">{route.route}</div>
+                <div className="text-xs text-surface-500 mb-2">{route.avgDays}</div>
+                <div className="flex flex-wrap gap-1">
+                  {route.partners.map((partner) => (
+                    <span key={partner} className="text-xs px-2 py-0.5 bg-surface-100 rounded text-surface-600">
+                      {partner}
+                    </span>
+                  ))}
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
-              <div className="text-sm text-amber-800">
-                <strong>Note:</strong> Bus parcel rates are cheaper but come with tradeoffs — no insurance, no real-time tracking, 
-                no door pickup/delivery, and limited accountability. ShipShare uses premium couriers (G4S, FedEx, DHL) 
-                with full insurance, GPS tracking, and door-to-door service.
+              <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+              <div className="text-sm text-blue-800">
+                <strong>What's included:</strong> Door-to-door pickup & delivery, real-time GPS tracking, 
+                KES 50,000 insurance, and M-Pesa payment. All prices are final — no hidden fees.
               </div>
             </div>
           </div>
-
-          <p className="text-center text-sm text-surface-500 mt-6">
-            * Solo courier rates from G4S, FedEx & DHL. Bus parcel rates from Easy Coach, ENA Coach & Modern Coast.
-          </p>
         </div>
       </section>
 
