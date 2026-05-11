@@ -3,13 +3,29 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Package, Calendar, Truck, ArrowRight } from 'lucide-react';
+import { ArrowLeft, MapPin, Package, Calendar, Truck, ArrowRight, Building2, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
+
+const POPULAR_CORRIDORS = [
+  { id: 'nbo-msa', origin: 'Nairobi', destination: 'Mombasa', avgSavings: '45%', soloPrice: 2500 },
+  { id: 'nbo-ebb', origin: 'Nairobi', destination: 'Eldoret', avgSavings: '40%', soloPrice: 2800 },
+  { id: 'nbo-nku', origin: 'Nairobi', destination: 'Nakuru', avgSavings: '35%', soloPrice: 1200 },
+  { id: 'msa-nbo', origin: 'Mombasa', destination: 'Nairobi', avgSavings: '45%', soloPrice: 2200 },
+  { id: 'nbo-ksm', origin: 'Nairobi', destination: 'Kisumu', avgSavings: '42%', soloPrice: 2600 },
+  { id: 'custom', origin: 'Custom', destination: 'Custom', avgSavings: 'Varies', soloPrice: 0 },
+];
+
+const BUSINESS_PARTNERS = [
+  { id: 'g4s', name: 'G4S Logistics', verified: true, rating: 4.8, coverage: 'Nationwide' },
+  { id: 'dhl', name: 'DHL Kenya', verified: true, rating: 4.7, coverage: 'Major Cities' },
+  { id: 'fedex', name: 'FedEx Kenya', verified: true, rating: 4.6, coverage: 'Major Cities' },
+  { id: 'sendy', name: 'Sendy Kenya', verified: true, rating: 4.5, coverage: 'Nairobi & Mombasa' },
+];
 
 const PACKAGE_TYPES = [
   { id: 'document', label: 'Document', icon: '📄', maxWeight: '2kg' },
@@ -21,6 +37,8 @@ const PACKAGE_TYPES = [
 
 export default function CreateShipmentPage() {
   const [step, setStep] = useState(1);
+  const [selectedCorridor, setSelectedCorridor] = useState<string | null>(null);
+  const [showCustomRoute, setShowCustomRoute] = useState(false);
   const [formData, setFormData] = useState({
     pickupLocation: '',
     destination: '',
@@ -109,21 +127,100 @@ export default function CreateShipmentPage() {
                 <div className="space-y-6 fade-in">
                   <h2 className="text-lg font-semibold text-surface-900">Where are you shipping from and to?</h2>
                   
-                  <Input
-                    label="Pickup Location"
-                    placeholder="e.g., Nairobi, Westlands"
-                    icon={<MapPin className="w-5 h-5" />}
-                    value={formData.pickupLocation}
-                    onChange={(e) => setFormData({ ...formData, pickupLocation: e.target.value })}
-                  />
-                  
-                  <Input
-                    label="Destination"
-                    placeholder="e.g., Mombasa, CBD"
-                    icon={<MapPin className="w-5 h-5" />}
-                    value={formData.destination}
-                    onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-                  />
+                  {!showCustomRoute ? (
+                    <>
+                      <div>
+                        <label className="block text-sm font-semibold text-surface-700 mb-3">
+                          Select a Popular Route
+                        </label>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {POPULAR_CORRIDORS.slice(0, -1).map((corridor) => (
+                            <button
+                              key={corridor.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedCorridor(corridor.id);
+                                setFormData({ 
+                                  ...formData, 
+                                  pickupLocation: corridor.origin, 
+                                  destination: corridor.destination 
+                                });
+                              }}
+                              className={`p-3 rounded-xl border-2 text-left transition-all ${
+                                selectedCorridor === corridor.id
+                                  ? 'border-primary-500 bg-primary-50'
+                                  : 'border-surface-200 hover:border-surface-300'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 mb-1">
+                                <ArrowRight className="w-3 h-3 text-surface-400" />
+                                <span className="text-sm font-medium text-surface-900">
+                                  {corridor.origin} → {corridor.destination}
+                                </span>
+                              </div>
+                              <div className="text-xs text-surface-500">
+                                Save up to {corridor.avgSavings}
+                              </div>
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => setShowCustomRoute(true)}
+                            className="p-3 rounded-xl border-2 border-dashed border-surface-200 text-center hover:border-surface-300 transition-all"
+                          >
+                            <div className="text-sm font-medium text-surface-600">Custom Route</div>
+                            <div className="text-xs text-surface-400">Anywhere in Kenya</div>
+                          </button>
+                        </div>
+                      </div>
+
+                      {selectedCorridor && (
+                        <div className="p-4 rounded-xl bg-primary-50 border border-primary-100">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Building2 className="w-5 h-5 text-primary-600" />
+                            <span className="font-semibold text-primary-700">Business Partners Available</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {BUSINESS_PARTNERS.map((partner) => (
+                              <div 
+                                key={partner.id}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white rounded-lg border border-primary-100"
+                              >
+                                <ShieldCheck className="w-3.5 h-3.5 text-primary-500" />
+                                <span className="text-xs font-medium text-surface-700">{partner.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="space-y-4">
+                      <Input
+                        label="Pickup Location"
+                        placeholder="e.g., Nakuru, Town"
+                        icon={<MapPin className="w-5 h-5" />}
+                        value={formData.pickupLocation}
+                        onChange={(e) => setFormData({ ...formData, pickupLocation: e.target.value })}
+                      />
+                      
+                      <Input
+                        label="Destination"
+                        placeholder="e.g., Kisumu, CBD"
+                        icon={<MapPin className="w-5 h-5" />}
+                        value={formData.destination}
+                        onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
+                      />
+
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setShowCustomRoute(false)}
+                      >
+                        ← Back to popular routes
+                      </Button>
+                    </div>
+                  )}
 
                   <div className="flex justify-end">
                     <Button 
