@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Check, ArrowRight, Package, Truck, Zap } from 'lucide-react';
+import { Check, ArrowRight, Package, Truck, Zap, Users, Banknote, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -11,56 +11,63 @@ import { Navbar } from '@/components/layout/Navbar';
 
 const PRICING_PLANS = [
   {
-    name: 'Starter',
-    description: 'Perfect for personal shipments and occasional shippers',
+    name: 'Free',
+    description: 'Pay per shipment. Perfect for testing and occasional shippers.',
     price: 0,
+    period: 'pay as you go',
+    platformFee: '10%',
     icon: Package,
     features: [
-      'Up to 5kg package weight',
+      'Up to 10kg package weight',
       'Standard shipping (3-5 days)',
       'Join existing groups',
-      'Basic tracking',
+      'Real-time tracking',
       'KES 10,000 insurance',
       'Email support',
-    ],
-    cta: 'Get Started',
-    popular: false,
-  },
-  {
-    name: 'Regular',
-    description: 'Great for small businesses and frequent shippers',
-    price: 499,
-    period: '/month',
-    icon: Truck,
-    features: [
-      'Up to 15kg package weight',
-      'Priority shipping (2-3 days)',
-      'Create & join groups',
-      'Real-time tracking',
-      'KES 25,000 insurance',
-      'Priority email support',
       'M-Pesa integration',
-      'SMS notifications',
     ],
-    cta: 'Start Free Trial',
+    cta: 'Start Free',
     popular: true,
   },
   {
-    name: 'Business',
-    description: 'For businesses with high shipping volumes',
-    price: 1999,
+    name: 'Pro',
+    description: 'Fixed monthly fee for frequent shippers. Save more with volume.',
+    price: 2000,
     period: '/month',
+    platformFee: '5%',
+    icon: Truck,
+    features: [
+      'Up to 30kg package weight',
+      'Priority shipping (2-3 days)',
+      'Create unlimited groups',
+      'Real-time tracking',
+      'KES 25,000 insurance',
+      'Priority support',
+      'M-Pesa integration',
+      'SMS notifications',
+      'Dedicated account manager',
+    ],
+    cta: 'Go Pro',
+    popular: false,
+  },
+  {
+    name: 'Enterprise',
+    description: 'Custom pricing for high-volume businesses and logistics partners.',
+    price: 0,
+    period: 'custom',
+    platformFee: 'Negotiated',
     icon: Zap,
     features: [
-      'Up to 50kg package weight',
+      'Unlimited package weight',
       'Express shipping (24-48h)',
       'Unlimited group creation',
-      'Advanced tracking & analytics',
-      'KES 50,000 insurance',
+      'Advanced analytics dashboard',
+      'KES 100,000 insurance',
       '24/7 phone support',
       'Dedicated account manager',
       'API access',
       'Custom billing',
+      'White-label options',
     ],
     cta: 'Contact Sales',
     popular: false,
@@ -68,18 +75,18 @@ const PRICING_PLANS = [
 ];
 
 const ROUTE_PRICING = [
-  { route: 'Nairobi - Mombasa', solo: 2500, group: 1500, savings: '40%' },
-  { route: 'Nairobi - Kisumu', solo: 2200, group: 1320, savings: '40%' },
-  { route: 'Nairobi - Nakuru', solo: 1200, group: 720, savings: '40%' },
-  { route: 'Nairobi - Eldoret', solo: 2800, group: 1540, savings: '45%' },
-  { route: 'Mombasa - Nairobi', solo: 2200, group: 1100, savings: '50%' },
-  { route: 'Kisumu - Nairobi', solo: 2400, group: 1440, savings: '40%' },
+  { route: 'Nairobi → Mombasa (10kg)', solo: 2500, group: 1500, bus: 400, savings: '40%' },
+  { route: 'Nairobi → Kisumu (10kg)', solo: 2200, group: 1320, bus: 350, savings: '40%' },
+  { route: 'Nairobi → Nakuru (10kg)', solo: 1200, group: 720, bus: 300, savings: '40%' },
+  { route: 'Nairobi → Eldoret (10kg)', solo: 2800, group: 1540, bus: 350, savings: '45%' },
+  { route: 'Mombasa → Nairobi (10kg)', solo: 2200, group: 1100, bus: 400, savings: '50%' },
+  { route: 'Kisumu → Nairobi (10kg)', solo: 2400, group: 1440, bus: 350, savings: '40%' },
 ];
 
 const FAQ = [
   {
     question: 'Is there a free trial?',
-    answer: 'Yes! All paid plans come with a 14-day free trial. No credit card required to start.',
+    answer: 'Yes! The Free plan has no monthly fees. You only pay a 10% platform fee per shipment. No credit card required to start.',
   },
   {
     question: 'Can I cancel anytime?',
@@ -87,15 +94,19 @@ const FAQ = [
   },
   {
     question: 'What happens if my package is lost or damaged?',
-    answer: 'All shipments are insured up to the plan limit. File a claim through your dashboard and we\'ll process it within 7 business days.',
+    answer: 'All shipments are insured up to the plan limit. File a claim through your dashboard and we process it within 7 business days.',
   },
   {
     question: 'Do you offer refunds?',
-    answer: 'We offer a full refund within 30 days of payment if you\'re not satisfied with our service.',
+    answer: 'We offer a full refund within 30 days of payment if you are not satisfied with our service.',
   },
   {
     question: 'Can I upgrade or downgrade my plan?',
     answer: 'Yes, you can change your plan at any time. Changes take effect on your next billing cycle.',
+  },
+  {
+    question: 'Why is ShipShare more expensive than bus parcel?',
+    answer: 'Bus parcel services are cheaper but don\'t include insurance, real-time tracking, door pickup/delivery, or accountability. ShipShare uses premium couriers (G4S, FedEx, DHL) with full insurance and tracking — at 40-60% less than going solo.',
   },
 ];
 
@@ -114,8 +125,18 @@ export default function PricingPage() {
             Simple, <span className="gradient-text">Transparent</span> Pricing
           </h1>
           <p className="text-lg text-surface-600 mb-10 max-w-2xl mx-auto">
-            Choose the plan that fits your shipping needs. All plans include our group shipping savings.
+            Premium courier shipping made affordable through group logistics. 
+            You save up to 60% compared to solo courier rates.
           </p>
+          
+          <div className="inline-flex items-center gap-3 p-1.5 bg-surface-100 rounded-xl">
+            <div className="px-4 py-2 bg-white rounded-lg text-sm font-medium text-surface-900 shadow-sm">
+              Premium Couriers
+            </div>
+            <div className="px-4 py-2 text-sm font-medium text-surface-600">
+              G4S · FedEx · DHL
+            </div>
+          </div>
         </div>
       </section>
 
@@ -144,12 +165,30 @@ export default function PricingPage() {
                 </div>
 
                 <div className="text-center mb-6">
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-4xl font-bold text-surface-900">KES {plan.price.toLocaleString()}</span>
-                    {plan.period && <span className="text-surface-500">{plan.period}</span>}
-                  </div>
-                  {plan.price === 0 && (
-                    <span className="text-sm text-surface-500">Free forever</span>
+                  {plan.price === 0 && plan.period === 'custom' ? (
+                    <div>
+                      <span className="text-3xl font-bold text-surface-900">Custom</span>
+                      <p className="text-sm text-surface-500 mt-1">Tailored to your needs</p>
+                    </div>
+                  ) : plan.price === 0 ? (
+                    <div>
+                      <span className="text-3xl font-bold text-surface-900">Free</span>
+                      <p className="text-sm text-surface-500 mt-1">No monthly fees</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex items-baseline justify-center gap-1">
+                        <span className="text-4xl font-bold text-surface-900">KES {plan.price.toLocaleString()}</span>
+                        <span className="text-surface-500">{plan.period}</span>
+                      </div>
+                    </div>
+                  )}
+                  {plan.platformFee && (
+                    <div className="mt-2">
+                      <Badge variant="accent">
+                        {plan.platformFee} per shipment
+                      </Badge>
+                    </div>
                   )}
                 </div>
 
@@ -177,6 +216,48 @@ export default function PricingPage() {
         </div>
       </section>
 
+      <section className="py-16 bg-white border-y border-surface-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-surface-900 mb-2">
+              How Our Pricing Works
+            </h2>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card className="p-6 text-center">
+              <div className="w-12 h-12 mx-auto mb-4 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600">
+                <Package className="w-6 h-6" />
+              </div>
+              <h3 className="font-semibold text-surface-900 mb-2">You List Shipment</h3>
+              <p className="text-sm text-surface-600">
+                Tell us what you're shipping and where it's going. We find a group for you.
+              </p>
+            </Card>
+            
+            <Card className="p-6 text-center">
+              <div className="w-12 h-12 mx-auto mb-4 bg-accent-100 rounded-xl flex items-center justify-center text-accent-600">
+                <Users className="w-6 h-6" />
+              </div>
+              <h3 className="font-semibold text-surface-900 mb-2">Group Ships Together</h3>
+              <p className="text-sm text-surface-600">
+                We connect you with others heading the same way. You split the courier cost.
+              </p>
+            </Card>
+            
+            <Card className="p-6 text-center">
+              <div className="w-12 h-12 mx-auto mb-4 bg-secondary-100 rounded-xl flex items-center justify-center text-secondary-600">
+                <Banknote className="w-6 h-6" />
+              </div>
+              <h3 className="font-semibold text-surface-900 mb-2">We Take a Small Fee</h3>
+              <p className="text-sm text-surface-600">
+                5-10% of the group shipping cost keeps the platform running.
+              </p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       <section className="py-20 lg:py-32 bg-surface-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -184,7 +265,7 @@ export default function PricingPage() {
               Route-Based Pricing
             </h2>
             <p className="text-lg text-surface-600">
-              See how much you can save on popular routes
+              See how much you can save compared to solo premium courier rates
             </p>
           </div>
 
@@ -194,8 +275,9 @@ export default function PricingPage() {
                 <thead>
                   <tr className="bg-surface-50 border-b border-surface-100">
                     <th className="text-left p-4 text-sm font-semibold text-surface-600">Route</th>
-                    <th className="text-right p-4 text-sm font-semibold text-surface-600">Solo Shipping</th>
-                    <th className="text-right p-4 text-sm font-semibold text-surface-600">Group Shipping</th>
+                    <th className="text-right p-4 text-sm font-semibold text-surface-600">Solo Courier</th>
+                    <th className="text-right p-4 text-sm font-semibold text-surface-600">ShipShare Group</th>
+                    <th className="text-right p-4 text-sm font-semibold text-surface-600">Bus Parcel</th>
                     <th className="text-right p-4 text-sm font-semibold text-surface-600">You Save</th>
                   </tr>
                 </thead>
@@ -204,7 +286,8 @@ export default function PricingPage() {
                     <tr key={idx} className="border-b border-surface-50 last:border-0">
                       <td className="p-4 font-medium text-surface-900">{route.route}</td>
                       <td className="p-4 text-right text-surface-500 line-through">KES {route.solo.toLocaleString()}</td>
-                      <td className="p-4 text-right font-semibold text-surface-900">KES {route.group.toLocaleString()}</td>
+                      <td className="p-4 text-right font-semibold text-accent-600">KES {route.group.toLocaleString()}</td>
+                      <td className="p-4 text-right text-surface-400">KES {route.bus.toLocaleString()}</td>
                       <td className="p-4 text-right">
                         <Badge variant="accent">{route.savings}</Badge>
                       </td>
@@ -215,8 +298,19 @@ export default function PricingPage() {
             </div>
           </Card>
 
+          <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+              <div className="text-sm text-amber-800">
+                <strong>Note:</strong> Bus parcel rates are cheaper but come with tradeoffs — no insurance, no real-time tracking, 
+                no door pickup/delivery, and limited accountability. ShipShare uses premium couriers (G4S, FedEx, DHL) 
+                with full insurance, GPS tracking, and door-to-door service.
+              </div>
+            </div>
+          </div>
+
           <p className="text-center text-sm text-surface-500 mt-6">
-            * Prices are estimates and may vary based on package weight and current group rates
+            * Solo courier rates from G4S, FedEx & DHL. Bus parcel rates from Easy Coach, ENA Coach & Modern Coast.
           </p>
         </div>
       </section>
