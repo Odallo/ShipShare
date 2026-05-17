@@ -1,138 +1,73 @@
 'use client';
 
-import React, { useState } from 'react';
-import { MapPin, Users, Calendar, Search, ArrowRight, PlusCircle, TrendingDown, Filter, Building2, Clock, ShieldCheck, Star } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
+import { Search, ArrowRight, Ship, Calendar, DollarSign, Filter, Package, X, Users, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Modal } from '@/components/ui/Modal';
+import { KNOWN_PORTS, CONTAINER_CBM, ContainerType } from '@/types';
 
-const POPULAR_CORRIDORS = [
-  { id: 'nbo-msa', origin: 'Nairobi', destination: 'Mombasa', avgSavings: '45%', trips: 1240 },
-  { id: 'nbo-ebb', origin: 'Nairobi', destination: 'Eldoret', avgSavings: '40%', trips: 890 },
-  { id: 'nbo-nku', origin: 'Nairobi', destination: 'Nakuru', avgSavings: '35%', trips: 756 },
-  { id: 'msa-nbo', origin: 'Mombasa', destination: 'Nairobi', avgSavings: '45%', trips: 1100 },
-  { id: 'nbo-ksm', origin: 'Nairobi', destination: 'Kisumu', avgSavings: '42%', trips: 620 },
-  { id: 'nbo-nrb', origin: 'Nairobi', destination: 'Nairobi', avgSavings: '30%', trips: 450 },
-];
+interface MockListing {
+  id: string;
+  originPort: string;
+  destinationPort: string;
+  containerType: ContainerType;
+  availableCbm: number;
+  totalCbm: number;
+  pricePerCbm: number;
+  departureDate: string;
+  cutoffDate: string;
+  shippingLine: string;
+  status: 'open' | 'closing' | 'full';
+}
 
-const BUSINESS_PARTNERS = [
-  { id: 'g4s', name: 'G4S Logistics', verified: true, rating: 4.8 },
-  { id: 'dhl', name: 'DHL Kenya', verified: true, rating: 4.7 },
-  { id: 'fedex', name: 'FedEx Kenya', verified: true, rating: 4.6 },
-  { id: 'sendy', name: 'Sendy Kenya', verified: true, rating: 4.5 },
-];
-
-const SHIPPING_GROUPS = [
-  {
-    id: 'grp-001',
-    origin: 'Nairobi, CBD',
-    destination: 'Mombasa, CBD',
-    corridor: 'nbo-msa',
-    participants: 3,
-    maxParticipants: 5,
-    totalWeight: '12.5 kg',
-    soloCost: 2500,
-    groupCost: 1500,
-    guaranteedCost: 2000,
-    savingsPercent: 40,
-    departureDate: 'Apr 5, 2024',
-    daysLeft: 2,
-    status: 'open',
-    provider: 'g4s',
-    isBusinessPartner: true,
-    guaranteedDelivery: true,
-  },
-  {
-    id: 'grp-002',
-    origin: 'Nairobi, Westlands',
-    destination: 'Nakuru, Town',
-    corridor: 'nbo-nku',
-    participants: 2,
-    maxParticipants: 4,
-    totalWeight: '8.0 kg',
-    soloCost: 1200,
-    groupCost: 780,
-    guaranteedCost: 950,
-    savingsPercent: 35,
-    departureDate: 'Apr 6, 2024',
-    daysLeft: 3,
-    status: 'open',
-    provider: 'fedex',
-    isBusinessPartner: true,
-    guaranteedDelivery: false,
-  },
-  {
-    id: 'grp-003',
-    origin: 'Nairobi, Kilimani',
-    destination: 'Eldoret, CBD',
-    corridor: 'nbo-ebb',
-    participants: 4,
-    maxParticipants: 4,
-    totalWeight: '22.0 kg',
-    soloCost: 2800,
-    groupCost: 1540,
-    guaranteedCost: 2100,
-    savingsPercent: 45,
-    departureDate: 'Apr 7, 2024',
-    daysLeft: 1,
-    status: 'closing',
-    provider: 'dhl',
-    isBusinessPartner: true,
-    guaranteedDelivery: true,
-  },
-  {
-    id: 'grp-004',
-    origin: 'Mombasa, CBD',
-    destination: 'Nairobi, CBD',
-    corridor: 'msa-nbo',
-    participants: 2,
-    maxParticipants: 6,
-    totalWeight: '15.0 kg',
-    soloCost: 2200,
-    groupCost: 1100,
-    guaranteedCost: 1600,
-    savingsPercent: 50,
-    departureDate: 'Apr 8, 2024',
-    daysLeft: 4,
-    status: 'open',
-    provider: 'sendy',
-    isBusinessPartner: true,
-    guaranteedDelivery: false,
-  },
+const MOCK_LISTINGS: MockListing[] = [
+  { id: 'LST-001', originPort: 'Shenzhen', destinationPort: 'Mombasa', containerType: '40HC', availableCbm: 32, totalCbm: 76.3, pricePerCbm: 42, departureDate: 'May 22, 2026', cutoffDate: 'May 18, 2026', shippingLine: 'Maersk', status: 'open' },
+  { id: 'LST-002', originPort: 'Ningbo', destinationPort: 'Mombasa', containerType: '40ft', availableCbm: 18, totalCbm: 67.3, pricePerCbm: 39, departureDate: 'May 28, 2026', cutoffDate: 'May 24, 2026', shippingLine: 'MSC', status: 'open' },
+  { id: 'LST-003', originPort: 'Shanghai', destinationPort: 'Dar es Salaam', containerType: '40HC', availableCbm: 12, totalCbm: 76.3, pricePerCbm: 45, departureDate: 'Jun 2, 2026', cutoffDate: 'May 29, 2026', shippingLine: 'CMA CGM', status: 'closing' },
+  { id: 'LST-004', originPort: 'Guangzhou', destinationPort: 'Mombasa', containerType: '20ft', availableCbm: 8, totalCbm: 33.1, pricePerCbm: 48, departureDate: 'May 25, 2026', cutoffDate: 'May 21, 2026', shippingLine: 'COSCO', status: 'open' },
+  { id: 'LST-005', originPort: 'Qingdao', destinationPort: 'Mombasa', containerType: '40HC', availableCbm: 45, totalCbm: 76.3, pricePerCbm: 36, departureDate: 'Jun 5, 2026', cutoffDate: 'Jun 1, 2026', shippingLine: 'Maersk', status: 'open' },
+  { id: 'LST-006', originPort: 'Shenzhen', destinationPort: 'Nairobi ICD', containerType: '40ft', availableCbm: 22, totalCbm: 67.3, pricePerCbm: 44, departureDate: 'May 30, 2026', cutoffDate: 'May 26, 2026', shippingLine: 'MSC', status: 'open' },
+  { id: 'LST-007', originPort: 'Ningbo', destinationPort: 'Mombasa', containerType: '20ft', availableCbm: 5, totalCbm: 33.1, pricePerCbm: 52, departureDate: 'May 20, 2026', cutoffDate: 'May 16, 2026', shippingLine: 'Hapag-Lloyd', status: 'closing' },
+  { id: 'LST-008', originPort: 'Shanghai', destinationPort: 'Mombasa', containerType: '40HC', availableCbm: 28, totalCbm: 76.3, pricePerCbm: 40, departureDate: 'Jun 8, 2026', cutoffDate: 'Jun 4, 2026', shippingLine: 'CMA CGM', status: 'open' },
 ];
 
 export default function MatchingPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<typeof SHIPPING_GROUPS[0] | null>(null);
+  const [bookingListing, setBookingListing] = useState<MockListing | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCorridor, setSelectedCorridor] = useState<string | null>(null);
-  const [showFlexPricing, setShowFlexPricing] = useState(false);
+  const [searchOrigin, setSearchOrigin] = useState('');
+  const [searchDest, setSearchDest] = useState('');
+  const [selectedContainerType, setSelectedContainerType] = useState<string>('');
+  const [priceMax, setPriceMax] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
-  const handleJoinGroup = (group: typeof SHIPPING_GROUPS[0]) => {
-    setSelectedGroup(group);
+  const handleBookSpace = (listing: MockListing) => {
+    setBookingListing(listing);
     setIsModalOpen(true);
   };
 
-  const confirmJoin = () => {
-    alert(`You've joined the group to ${selectedGroup?.destination}!`);
+  const confirmBooking = () => {
+    alert(`Booking request sent for ${bookingListing?.id}! The shipper will confirm shortly.`);
     setIsModalOpen(false);
   };
 
-  const filteredGroups = SHIPPING_GROUPS.filter((group) => {
-    const matchesSearch =
-      group.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      group.origin.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCorridor = !selectedCorridor || group.corridor === selectedCorridor;
-    return matchesSearch && matchesCorridor;
-  });
+  const filteredListings = useMemo(() => {
+    return MOCK_LISTINGS.filter((l) => {
+      if (searchOrigin && !l.originPort.toLowerCase().includes(searchOrigin.toLowerCase())) return false;
+      if (searchDest && !l.destinationPort.toLowerCase().includes(searchDest.toLowerCase())) return false;
+      if (selectedContainerType && l.containerType !== selectedContainerType) return false;
+      if (priceMax && l.pricePerCbm > Number(priceMax)) return false;
+      return true;
+    });
+  }, [searchOrigin, searchDest, selectedContainerType, priceMax]);
 
-  const getProviderInfo = (providerId: string) => {
-    return BUSINESS_PARTNERS.find(p => p.id === providerId) || { name: providerId, verified: false, rating: 0 };
-  };
+  const fillRate = (listing: MockListing) =>
+    Math.round(((listing.totalCbm - listing.availableCbm) / listing.totalCbm) * 100);
 
   return (
     <div className="min-h-screen bg-surface-50">
@@ -145,24 +80,19 @@ export default function MatchingPage() {
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-surface-900">
-                  Find Shipping Groups
+                  Find Container Space
                 </h1>
                 <p className="text-surface-500 mt-1">
-                  Join groups going your way and save up to 50%
+                  Browse available slack space on booked containers
                 </p>
               </div>
               
-              <Card className="p-4 bg-gradient-to-r from-accent-50 to-primary-50 border-accent-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-accent-100 rounded-xl flex items-center justify-center text-accent-600">
-                    <TrendingDown className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-surface-500">Your potential savings</div>
-                    <div className="text-xl font-bold text-accent-600">KES 5,800+</div>
-                  </div>
-                </div>
-              </Card>
+              <Link href="/shipments/create">
+                <Button className="gap-2">
+                  <Ship className="w-4 h-4" />
+                  List Your Space
+                </Button>
+              </Link>
             </div>
 
             <Card className="mb-8 p-4">
@@ -172,45 +102,74 @@ export default function MatchingPage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
                     <input
                       type="text"
-                      placeholder="Search by destination or origin..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Origin port..."
+                      value={searchOrigin}
+                      onChange={(e) => setSearchOrigin(e.target.value)}
                       className="input-field pl-10"
                     />
                   </div>
-                  <div className="flex gap-3 flex-wrap">
-                    <select className="px-4 py-2.5 border border-surface-200 rounded-lg text-sm bg-white text-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                      <option>Any Time</option>
-                      <option>Today</option>
-                      <option>Tomorrow</option>
-                      <option>This Week</option>
-                    </select>
-                    <Button 
-                      variant={showFlexPricing ? "primary" : "secondary"} 
-                      className="gap-2"
-                      onClick={() => setShowFlexPricing(!showFlexPricing)}
-                    >
-                      <Clock className="w-4 h-4" />
-                      Flex Pricing
-                    </Button>
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
+                    <input
+                      type="text"
+                      placeholder="Destination port..."
+                      value={searchDest}
+                      onChange={(e) => setSearchDest(e.target.value)}
+                      className="input-field pl-10"
+                    />
                   </div>
+                  <Button
+                    variant="secondary"
+                    className="gap-2"
+                    onClick={() => setShowFilters(!showFilters)}
+                  >
+                    <Filter className="w-4 h-4" />
+                    Filters
+                  </Button>
                 </div>
+
+                {showFilters && (
+                  <div className="flex flex-wrap gap-4 pt-2">
+                    <div>
+                      <label className="block text-xs font-medium text-surface-500 mb-1">Container Type</label>
+                      <select
+                        value={selectedContainerType}
+                        onChange={(e) => setSelectedContainerType(e.target.value)}
+                        className="px-3 py-2 border border-surface-200 rounded-lg text-sm bg-white text-surface-700"
+                      >
+                        <option value="">All Types</option>
+                        <option value="20ft">20ft (33.1 CBM)</option>
+                        <option value="40ft">40ft (67.3 CBM)</option>
+                        <option value="40HC">40HC (76.3 CBM)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-surface-500 mb-1">Max Price ($/CBM)</label>
+                      <input
+                        type="number"
+                        placeholder="Any"
+                        value={priceMax}
+                        onChange={(e) => setPriceMax(e.target.value)}
+                        className="px-3 py-2 border border-surface-200 rounded-lg text-sm bg-white text-surface-700 w-28"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <div className="text-xs font-medium text-surface-500 mb-2">Popular Routes</div>
                   <div className="flex flex-wrap gap-2">
-                    {POPULAR_CORRIDORS.map((corridor) => (
+                    {['Shenzhen → Mombasa', 'Ningbo → Mombasa', 'Shanghai → Dar es Salaam', 'Guangzhou → Mombasa', 'Shenzhen → Nairobi ICD'].map((route) => (
                       <button
-                        key={corridor.id}
-                        onClick={() => setSelectedCorridor(selectedCorridor === corridor.id ? null : corridor.id)}
-                        className={`px-3 py-1.5 rounded-full text-sm transition-all ${
-                          selectedCorridor === corridor.id
-                            ? 'gradient-bg text-white'
-                            : 'bg-surface-100 text-surface-600 hover:bg-surface-200'
-                        }`}
+                        key={route}
+                        onClick={() => {
+                          const parts = route.split(' → ');
+                          setSearchOrigin(parts[0]);
+                          setSearchDest(parts[1]);
+                        }}
+                        className="px-3 py-1.5 rounded-full text-sm bg-surface-100 text-surface-600 hover:bg-surface-200 transition-all"
                       >
-                        {corridor.origin} → {corridor.destination}
-                        <span className="ml-1 opacity-75">({corridor.avgSavings})</span>
+                        {route}
                       </button>
                     ))}
                   </div>
@@ -218,144 +177,82 @@ export default function MatchingPage() {
               </div>
             </Card>
 
-            <div className="space-y-4">
-              {filteredGroups.map((group) => (
-                <Card key={group.id} hover className="p-6">
-                  <div className="flex flex-col lg:flex-row gap-6">
-                    <div className="flex-1">
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 shrink-0">
-                          <MapPin className="w-7 h-7" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap mb-2">
-                            <h3 className="text-lg font-semibold text-surface-900">{group.origin}</h3>
-                            <ArrowRight className="w-4 h-4 text-surface-400" />
-                            <h3 className="text-lg font-semibold text-surface-900">{group.destination}</h3>
-                          </div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Badge variant={group.status === 'closing' ? 'warning' : 'primary'}>
-                              {group.status === 'closing' ? 'Closing Soon' : 'Accepting Members'}
-                            </Badge>
-                            <span className="text-sm text-surface-500">ID: {group.id}</span>
-                          </div>
-                        </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              {filteredListings.map((listing) => (
+                <Card key={listing.id} hover className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <div className="flex items-center gap-2 text-sm text-surface-500 mb-1">
+                        <Ship className="w-4 h-4" />
+                        {listing.originPort}
                       </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
-                        <div>
-                          <div className="text-surface-500 text-xs mb-1">Members</div>
-                          <div className="flex items-center gap-2 text-surface-900 font-medium">
-                            <Users className="w-4 h-4 text-primary-500" />
-                            <span>{group.participants}/{group.maxParticipants}</span>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-surface-500 text-xs mb-1">Total Weight</div>
-                          <div className="text-surface-900 font-medium">{group.totalWeight}</div>
-                        </div>
-                        <div>
-                          <div className="text-surface-500 text-xs mb-1">Departure</div>
-                          <div className="flex items-center gap-2 text-surface-900 font-medium">
-                            <Calendar className="w-4 h-4 text-primary-500" />
-                            <span>{group.departureDate}</span>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-surface-500 text-xs mb-1">Provider</div>
-                          <div className="flex items-center gap-1">
-                            {group.isBusinessPartner && <ShieldCheck className="w-3.5 h-3.5 text-primary-500" />}
-                            <span className="text-surface-900 font-medium">{getProviderInfo(group.provider).name}</span>
-                          </div>
-                        </div>
-                        {group.guaranteedDelivery && (
-                          <div>
-                            <div className="text-surface-500 text-xs mb-1">Delivery</div>
-                            <div className="flex items-center gap-1 text-accent-600 font-medium">
-                              <ShieldCheck className="w-4 h-4" />
-                              <span>Guaranteed</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="mt-4">
-                        <div className="flex justify-between text-xs text-surface-500 mb-1">
-                          <span>{group.participants} joined</span>
-                          <span>{group.maxParticipants - group.participants} spots left</span>
-                        </div>
-                        <div className="w-full bg-surface-100 rounded-full h-2">
-                          <div
-                            className="gradient-bg h-2 rounded-full transition-all"
-                            style={{ width: `${(group.participants / group.maxParticipants) * 100}%` }}
-                          />
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <ArrowRight className="w-4 h-4 text-primary-500" />
+                        <span className="font-semibold text-surface-900">{listing.destinationPort}</span>
                       </div>
                     </div>
+                    <Badge variant={listing.status === 'closing' ? 'warning' : listing.status === 'full' ? 'secondary' : 'primary'}>
+                      {listing.status === 'closing' ? 'Closing Soon' : listing.status === 'full' ? 'Full' : 'Open'}
+                    </Badge>
+                  </div>
 
-                    <div className="lg:w-72 flex flex-col justify-center lg:border-l border-surface-100 lg:pl-6">
-                      {showFlexPricing ? (
-                        <div className="space-y-3">
-                          <div className="p-3 rounded-lg bg-surface-50 border border-surface-100">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm text-surface-600">Group Rate</span>
-                              {group.participants >= group.maxParticipants - 1 && (
-                                <Badge variant="warning" className="text-xs">Filling Fast</Badge>
-                              )}
-                            </div>
-                            <div className="text-2xl font-bold text-accent-600">
-                              KES {group.groupCost.toLocaleString()}
-                            </div>
-                            <div className="text-xs text-surface-500">Save {group.savingsPercent}%</div>
-                          </div>
-                          <div className="p-3 rounded-lg bg-primary-50 border border-primary-100">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm text-primary-700 flex items-center gap-1">
-                                <ShieldCheck className="w-3.5 h-3.5" />
-                                Guaranteed Rate
-                              </span>
-                            </div>
-                            <div className="text-2xl font-bold text-primary-600">
-                              KES {group.guaranteedCost.toLocaleString()}
-                            </div>
-                            <div className="text-xs text-primary-600">Ship even if group doesn't fill</div>
-                          </div>
-                          <div className="text-xs text-surface-500 italic">
-                            * Choose guaranteed rate to secure your shipment now. You'll only pay the group rate if the group fills.
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="mb-2">
-                            <div className="text-sm text-surface-500">Solo shipping</div>
-                            <div className="text-lg text-surface-400 line-through">KES {group.soloCost.toLocaleString()}</div>
-                          </div>
-                          <div className="mb-4">
-                            <div className="text-sm text-accent-600 font-medium">With this group</div>
-                            <div className="text-3xl font-bold text-accent-600">
-                              KES {group.groupCost.toLocaleString()}
-                            </div>
-                            <div className="text-sm text-surface-500">Save {group.savingsPercent}%</div>
-                          </div>
-                        </>
-                      )}
-                      <Button onClick={() => handleJoinGroup(group)} className="w-full">
-                        Join Group
-                      </Button>
+                  <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                    <div>
+                      <span className="text-surface-500">Container</span>
+                      <p className="font-medium text-surface-900">{listing.containerType}</p>
+                    </div>
+                    <div>
+                      <span className="text-surface-500">Shipping Line</span>
+                      <p className="font-medium text-surface-900">{listing.shippingLine}</p>
+                    </div>
+                    <div>
+                      <span className="text-surface-500">Available</span>
+                      <p className="font-medium text-surface-900">{listing.availableCbm} / {listing.totalCbm} CBM</p>
+                    </div>
+                    <div>
+                      <span className="text-surface-500">Price</span>
+                      <p className="font-bold text-accent-600">${listing.pricePerCbm}/CBM</p>
+                    </div>
+                    <div>
+                      <span className="text-surface-500">Departs</span>
+                      <p className="font-medium text-surface-900">{listing.departureDate}</p>
+                    </div>
+                    <div>
+                      <span className="text-surface-500">Cutoff</span>
+                      <p className="font-medium text-surface-900">{listing.cutoffDate}</p>
                     </div>
                   </div>
+
+                  <div className="mb-4">
+                    <div className="flex justify-between text-xs text-surface-500 mb-1">
+                      <span>{fillRate(listing)}% filled</span>
+                      <span>{listing.availableCbm} CBM left</span>
+                    </div>
+                    <div className="w-full bg-surface-100 rounded-full h-2">
+                      <div
+                        className="gradient-bg h-2 rounded-full transition-all"
+                        style={{ width: `${fillRate(listing)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <Button onClick={() => handleBookSpace(listing)} className="w-full" size="sm">
+                    Book Space
+                  </Button>
                 </Card>
               ))}
             </div>
 
-            {filteredGroups.length === 0 && (
+            {filteredListings.length === 0 && (
               <Card className="p-12 text-center">
-                <MapPin className="w-12 h-12 text-surface-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-surface-900 mb-2">No groups found</h3>
+                <Package className="w-12 h-12 text-surface-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-surface-900 mb-2">No space found</h3>
                 <p className="text-surface-500 mb-6">
-                  Try adjusting your search or create a new group
+                  Try adjusting your search or check back later
                 </p>
-                <Button>Create New Group</Button>
+                <Link href="/shipments/create">
+                  <Button variant="secondary">List Your Space</Button>
+                </Link>
               </Card>
             )}
 
@@ -363,34 +260,36 @@ export default function MatchingPage() {
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center text-primary-600 shadow-card">
-                    <PlusCircle className="w-7 h-7" />
+                    <Users className="w-7 h-7" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-surface-900">Can&apos;t find a match?</h3>
+                    <h3 className="font-semibold text-surface-900">Have container space to fill?</h3>
                     <p className="text-sm text-surface-600">
-                      Create your own group and invite others to join
+                      List your available container space and earn from what would otherwise ship empty
                     </p>
                   </div>
                 </div>
-                <Button variant="secondary">Create New Group</Button>
+                <Link href="/shipments/create">
+                  <Button variant="secondary">List Your Space</Button>
+                </Link>
               </div>
             </div>
           </div>
         </main>
       </div>
 
-<Modal
+      <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Join Shipping Group"
+        title="Book Container Space"
       >
-        {selectedGroup && (
+        {bookingListing && (
           <div className="space-y-6">
             <div className="bg-gradient-to-r from-accent-50 to-primary-50 rounded-xl p-4 border border-accent-100">
               <div className="text-center">
-                <div className="text-sm text-surface-600 mb-1">You'll save approximately</div>
+                <div className="text-sm text-surface-600 mb-1">Price per CBM</div>
                 <div className="text-4xl font-bold gradient-text">
-                  KES {(selectedGroup.soloCost - selectedGroup.groupCost).toLocaleString()}
+                  ${bookingListing.pricePerCbm}
                 </div>
               </div>
             </div>
@@ -399,82 +298,59 @@ export default function MatchingPage() {
               <div className="flex justify-between py-2 border-b border-surface-100">
                 <span className="text-surface-500">Route</span>
                 <span className="font-medium text-surface-900">
-                  {selectedGroup.origin} - {selectedGroup.destination}
+                  {bookingListing.originPort} → {bookingListing.destinationPort}
                 </span>
               </div>
               <div className="flex justify-between py-2 border-b border-surface-100">
-                <span className="text-surface-500">Group size</span>
-                <span className="font-medium text-surface-900">
-                  {selectedGroup.participants}/{selectedGroup.maxParticipants} members
-                </span>
+                <span className="text-surface-500">Container</span>
+                <span className="font-medium text-surface-900">{bookingListing.containerType}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-surface-100">
+                <span className="text-surface-500">Available</span>
+                <span className="font-medium text-surface-900">{bookingListing.availableCbm} CBM</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-surface-100">
+                <span className="text-surface-500">Shipping Line</span>
+                <span className="font-medium text-surface-900">{bookingListing.shippingLine}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-surface-100">
                 <span className="text-surface-500">Departure</span>
-                <span className="font-medium text-surface-900">{selectedGroup.departureDate}</span>
+                <span className="font-medium text-surface-900">{bookingListing.departureDate}</span>
               </div>
               <div className="flex justify-between py-2">
-                <span className="text-surface-500">Provider</span>
-                <span className="font-medium text-surface-900 flex items-center gap-1">
-                  {selectedGroup.isBusinessPartner && <ShieldCheck className="w-3.5 h-3.5 text-primary-500" />}
-                  {getProviderInfo(selectedGroup.provider).name}
-                </span>
+                <span className="text-surface-500">Cutoff</span>
+                <span className="font-medium text-surface-900">{bookingListing.cutoffDate}</span>
               </div>
             </div>
 
             <div className="p-4 rounded-xl bg-primary-50 border border-primary-100">
               <div className="flex items-center gap-2 mb-2">
-                <Building2 className="w-5 h-5 text-primary-600" />
-                <span className="font-semibold text-primary-700">Business Partner</span>
+                <Package className="w-5 h-5 text-primary-600" />
+                <span className="font-semibold text-primary-700">How much space do you need?</span>
               </div>
               <p className="text-sm text-primary-600">
-                This shipment is handled by {getProviderInfo(selectedGroup.provider).name}, a verified partner. 
-                Rated {getProviderInfo(selectedGroup.provider).rating} stars by our community.
+                Enter the CBM you need and we'll calculate the total. The shipper will confirm availability within 24 hours.
               </p>
             </div>
 
-            {selectedGroup.guaranteedDelivery && (
-              <div className="p-3 rounded-lg bg-accent-50 border border-accent-100">
-                <div className="flex items-center gap-2 text-accent-700 text-sm font-medium mb-1">
-                  <ShieldCheck className="w-4 h-4" />
-                  Guaranteed Delivery
-                </div>
-                <p className="text-xs text-accent-600">
-                  Your package is insured up to KES 50,000. Delivery within 24-48 hours guaranteed.
-                </p>
+            <div className="flex gap-4 items-end">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-surface-700 mb-1">CBM needed</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 5"
+                  max={bookingListing.availableCbm}
+                  className="input-field w-full"
+                />
               </div>
-            )}
-
-            <div className="space-y-2">
-              <label className="flex items-center gap-3 p-3 rounded-lg border border-surface-200 cursor-pointer hover:bg-surface-50">
-                <input type="radio" name="pricing" defaultChecked className="w-4 h-4 text-primary-600" />
-                <div className="flex-1">
-                  <div className="font-medium text-surface-900">Group Rate</div>
-                  <div className="text-sm text-surface-500">KES {selectedGroup.groupCost.toLocaleString()} - Pay only if group fills</div>
-                </div>
-              </label>
-              <label className="flex items-center gap-3 p-3 rounded-lg border-2 border-primary-200 bg-primary-50 cursor-pointer">
-                <input type="radio" name="pricing" className="w-4 h-4 text-primary-600" />
-                <div className="flex-1">
-                  <div className="font-medium text-surface-900 flex items-center gap-2">
-                    Guaranteed Rate
-                    <Badge variant="primary" className="text-xs">Recommended</Badge>
-                  </div>
-                  <div className="text-sm text-surface-500">KES {selectedGroup.guaranteedCost.toLocaleString()} - Ship immediately</div>
-                </div>
-              </label>
+              <Button onClick={confirmBooking}>
+                Send Request
+              </Button>
             </div>
-
-            <p className="text-sm text-surface-600">
-              By joining, you'll share shipping costs with other members. Payment will be 
-              collected via M-Pesa once the group is full.
-            </p>
 
             <div className="flex gap-3">
               <Button variant="secondary" onClick={() => setIsModalOpen(false)} className="flex-1">
                 Cancel
-              </Button>
-              <Button onClick={confirmJoin} className="flex-1">
-                Confirm & Join
               </Button>
             </div>
           </div>

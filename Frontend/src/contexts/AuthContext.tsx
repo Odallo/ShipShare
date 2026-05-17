@@ -1,13 +1,14 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User } from '@/types';
+import { User, UserRole } from '@/types';
 
 interface SignupData {
   name: string;
   email: string;
   phone: string;
   password: string;
+  role: UserRole;
   location?: string;
   userType?: 'individual' | 'business';
   businessName?: string;
@@ -20,9 +21,12 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   signup: (userData: SignupData) => Promise<boolean>;
   logout: () => void;
+  updateUser: (updates: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const STORAGE_KEY = 'containershare_user';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -30,13 +34,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('shipshare_user');
+      const storedUser = localStorage.getItem(STORAGE_KEY);
       if (storedUser) {
         setUser(JSON.parse(storedUser));
         setIsAuthenticated(true);
       }
     }
   }, []);
+
+  const persistUser = (u: User) => {
+    setUser(u);
+    setIsAuthenticated(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+    }
+  };
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -53,11 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const data = await response.json();
-      const user = data.user;
-
-      setUser(user);
-      setIsAuthenticated(true);
-      localStorage.setItem('shipshare_user', JSON.stringify(user));
+      persistUser(data.user);
       return true;
     } catch (error) {
       console.error('Login failed:', error);
@@ -80,11 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const data = await response.json();
-      const user = data.user;
-
-      setUser(user);
-      setIsAuthenticated(true);
-      localStorage.setItem('shipshare_user', JSON.stringify(user));
+      persistUser(data.user);
       return true;
     } catch (error) {
       console.error('Signup failed:', error);
@@ -104,12 +108,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setIsAuthenticated(false);
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('shipshare_user');
+      localStorage.removeItem(STORAGE_KEY);
     }
   };
 
+  const updateUser = (updates: Partial<User>) => {
+    if (!user) return;
+    const updated = { ...user, ...updates, updatedAt: new Date().toISOString() };
+    persistUser(updated);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, login, signup, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -48,7 +48,6 @@ export interface User {
   userType?: 'individual' | 'business';
   businessName?: string;
   businessRegistration?: string;
-  kraPin?: string;
   verified: boolean;
   trustScore: number;
   avatar?: string;
