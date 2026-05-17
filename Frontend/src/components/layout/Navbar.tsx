@@ -2,19 +2,29 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, Package } from 'lucide-react';
+import { Menu, X, Ship, Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, user } = useAuth();
+  const role = user?.role;
 
   const navLinks = [
     { href: '/how-it-works', label: 'How It Works' },
-    { href: '/matching', label: 'Find Groups' },
+    { href: '/matching', label: 'Find Space' },
     { href: '/pricing', label: 'Pricing' },
   ];
+
+  const primaryCta = () => {
+    if (role === 'shipper' || role === 'both') {
+      return { href: '/shipments/create', label: 'List Space', icon: Ship };
+    }
+    return { href: '/matching', label: 'Find Space', icon: Search };
+  };
+
+  const cta = isAuthenticated ? primaryCta() : null;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-surface-100">
@@ -22,7 +32,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
-              <Package className="w-6 h-6 text-white" />
+              <Ship className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-bold text-surface-900">ShipShare</span>
           </Link>
@@ -45,9 +55,14 @@ export function Navbar() {
                 <Link href="/dashboard">
                   <Button variant="ghost">Dashboard</Button>
                 </Link>
-                <Link href="/shipments/create">
-                  <Button>Create Shipment</Button>
-                </Link>
+                {cta && (
+                  <Link href={cta.href}>
+                    <Button className="gap-2">
+                      <cta.icon className="w-4 h-4" />
+                      {cta.label}
+                    </Button>
+                  </Link>
+                )}
               </>
             ) : (
               <>
@@ -89,9 +104,14 @@ export function Navbar() {
                   <Link href="/dashboard" onClick={() => setIsOpen(false)}>
                     <Button variant="ghost" className="w-full">Dashboard</Button>
                   </Link>
-                  <Link href="/shipments/create" onClick={() => setIsOpen(false)}>
-                    <Button className="w-full">Create Shipment</Button>
-                  </Link>
+                  {cta && (
+                    <Link href={cta.href} onClick={() => setIsOpen(false)}>
+                      <Button className="w-full gap-2">
+                        <cta.icon className="w-4 h-4" />
+                        {cta.label}
+                      </Button>
+                    </Link>
+                  )}
                 </>
               ) : (
                 <>

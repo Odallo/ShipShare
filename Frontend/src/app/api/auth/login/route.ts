@@ -1,31 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
-    const response = await fetch(`${API_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: body.email,
+      password: body.password,
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
+    if (error) {
       return NextResponse.json(
-        { error: data.error || 'Login failed' },
-        { status: response.status }
+        { error: 'Invalid email or password' },
+        { status: 401 }
       );
     }
 
-    return NextResponse.json(data);
+    const user = data.user;
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Login failed' },
+        { status: 500 }
+      );
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    return NextResponse.json({
+      user: {
+        id: user.id,
+        name: profile?.name || user.user_metadata?.name || '',
+        email: user.email,
+        phone: profile?.phone || user.user_metadata?.phone || '',
+        role: profile?.role || user.user_metadata?.role || 'filler',
+        userType: profile?.user_type || user.user_metadata?.user_type || 'individual',
+        businessName: profile?.business_name || user.user_metadata?.business_name,
+        businessRegistration: profile?.business_registration || user.user_metadata?.business_registration,
+        location: profile?.location,
+        verified: profile?.verified || false,
+        trustScore: profile?.trust_score || 0,
+      },
+    });
   } catch (error) {
-    console.error('Login error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

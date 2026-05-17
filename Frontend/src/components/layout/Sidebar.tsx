@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { X, Package, Users, Home, User, CreditCard, HelpCircle } from 'lucide-react';
+import { X, Ship, Search, Home, User, CreditCard, HelpCircle, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
@@ -12,9 +12,9 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: Home },
-  { href: '/matching', label: 'Find Groups', icon: Users },
-  { href: '/shipments/create', label: 'Create Shipment', icon: Package },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/matching', label: 'Find Space', icon: Search },
+  { href: '/shipments/create', label: 'List Space', icon: Ship },
   { href: '/profile', label: 'Profile', icon: User },
   { href: '/pricing', label: 'Pricing', icon: CreditCard },
   { href: '/how-it-works', label: 'How It Works', icon: HelpCircle },

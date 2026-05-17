@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MapPin, Users, Banknote, Shield, Clock, Truck, Package, ArrowRight, CheckCircle2, Star } from 'lucide-react';
+import { Ship, Search, DollarSign, Shield, Clock, Users, ArrowRight, CheckCircle2, Star } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -12,63 +12,63 @@ import { Navbar } from '@/components/layout/Navbar';
 const STEPS = [
   {
     number: 1,
-    icon: MapPin,
-    title: 'Enter Your Route',
-    description: 'Tell us where you\'re shipping from and to. We cover major routes across Kenya including Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, and more.',
+    icon: Ship,
+    title: 'Shipper Lists Space',
+    description: 'A freight forwarder or shipper posts available container slack space — route, CBM available, departure date, and price per CBM.',
   },
   {
     number: 2,
-    icon: Users,
-    title: 'Join or Create a Group',
-    description: 'Browse existing groups heading your way or create your own. Our smart matching algorithm connects you with others shipping to the same destination.',
+    icon: Search,
+    title: 'Filler Finds & Books',
+    description: 'Fillers browse by route and date, find a container heading their way, and book the exact CBM they need.',
   },
   {
     number: 3,
-    icon: Banknote,
-    title: 'Save Up to 60%',
-    description: 'By grouping shipments together, you split the shipping costs and save significantly. Payment is collected securely via M-Pesa once groups are confirmed.',
+    icon: DollarSign,
+    title: 'Pay Per CBM',
+    description: 'Fillers pay only for the space they use. Shipper gets paid. Platform takes a small commission on booking.',
   },
   {
     number: 4,
-    icon: Truck,
-    title: 'Track & Receive',
-    description: 'Track your shipment in real-time from pickup to delivery. All shipments are insured for peace of mind.',
+    icon: Shield,
+    title: 'Cargo Ships Confirmed',
+    description: 'The container departs on schedule. Both parties track the shipment and rate each other afterward.',
   },
 ];
 
 const BENEFITS = [
   {
-    icon: Shield,
-    title: 'Fully Insured',
-    description: 'Every shipment is insured up to KES 50,000. Your packages are protected from pickup to delivery.',
+    icon: DollarSign,
+    title: 'Save 40-60% vs LCL',
+    description: 'Fill slack space that would otherwise ship empty. Fillers get rates far below standard LCL pricing.',
   },
   {
     icon: Clock,
-    title: 'Fast Delivery',
-    description: '24-48 hour delivery on major routes. Express options available for urgent shipments.',
+    title: 'No Minimum Volume',
+    description: 'Need just 5 CBM? No problem. Book exactly what you need — no minimums, no wasted spend.',
   },
   {
-    icon: Package,
-    title: 'Flexible Sizes',
-    description: 'Ship documents, small packages, or large items up to 50kg. We handle it all.',
+    icon: Users,
+    title: 'Monetize Empty Space',
+    description: 'Shippers earn revenue from space they were already shipping empty. Turn waste into profit.',
   },
 ];
 
 const TESTIMONIALS = [
   {
-    name: 'Wanjiku M.',
-    role: 'Small Business Owner',
-    location: 'Nairobi',
-    content: 'ShipShare has cut my shipping costs by half! I send stock to Mombasa weekly.',
-    avatar: 'WM',
+    name: 'James K.',
+    role: 'Freight Forwarder',
+    location: 'Mombasa',
+    content: 'I was shipping containers with 30% empty space every week. Now I monetize that space and fillers get competitive rates.',
+    avatar: 'JK',
     rating: 5,
   },
   {
-    name: 'Ochieng J.',
-    role: 'Online Seller',
-    location: 'Kisumu',
-    content: 'The cost savings are real - from KES 3,000 to KES 1,200 per shipment!',
-    avatar: 'OJ',
+    name: 'Amina H.',
+    role: 'Importer',
+    location: 'Nairobi',
+    content: 'I ship electronics from China monthly. Finding slack space cut my freight costs by 45%. The platform is simple and transparent.',
+    avatar: 'AH',
     rating: 5,
   },
 ];
@@ -85,22 +85,24 @@ export default function HowItWorksPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Badge variant="new" className="mb-6">How It Works</Badge>
           <h1 className="text-4xl sm:text-5xl font-bold text-surface-900 mb-6">
-            Ship Smarter, <span className="gradient-text">Save More</span>
+            Fill Empty Space, <span className="gradient-text">Ship Cheaper</span>
           </h1>
           <p className="text-lg text-surface-600 mb-10 max-w-2xl mx-auto">
-            Learn how ShipShare helps you save up to 60% on shipping costs by connecting you with other shippers heading the same way.
+            A marketplace connecting shippers with spare container capacity to businesses that need affordable freight.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/signup">
               <Button size="lg" className="gap-2">
-                Get Started Free
+                <Ship className="w-5 h-5" />
+                List Your Space
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
-            <Link href="/pricing">
+            <Link href="/matching">
               <Button variant="secondary" size="lg">
-                View Pricing
+                <Search className="w-5 h-5 mr-2" />
+                Find Space
               </Button>
             </Link>
           </div>
@@ -132,10 +134,10 @@ export default function HowItWorksPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-surface-900 mb-4">
-              Why Ship with ShipShare?
+              Why Use ContainerShare?
             </h2>
             <p className="text-lg text-surface-600 max-w-2xl mx-auto">
-              We make shipping affordable, reliable, and transparent for everyone in Kenya.
+              Better than LCL. Better than shipping empty.
             </p>
           </div>
 
@@ -191,15 +193,20 @@ export default function HowItWorksPage() {
         
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to Start Saving?
+            Ready to Ship Smarter?
           </h2>
           <p className="text-lg text-primary-100 mb-10 max-w-2xl mx-auto">
-            Join thousands of smart shippers across Kenya. Create your free account in under 2 minutes.
+            Join freight forwarders and importers already using container slack space.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/auth/signup">
+            <Link href="/auth/signup?role=shipper">
               <Button size="lg" variant="secondary" className="shadow-xl">
-                Create Free Account
+                List Your Space
+              </Button>
+            </Link>
+            <Link href="/matching">
+              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                Find Space
               </Button>
             </Link>
           </div>
@@ -211,11 +218,11 @@ export default function HowItWorksPage() {
             </div>
             <div className="flex items-center gap-2 text-primary-200 text-sm">
               <CheckCircle2 className="w-4 h-4" />
-              <span>Free to join</span>
+              <span>Free to list</span>
             </div>
             <div className="flex items-center gap-2 text-primary-200 text-sm">
               <CheckCircle2 className="w-4 h-4" />
-              <span>Cancel anytime</span>
+              <span>Pay only on booking</span>
             </div>
           </div>
         </div>

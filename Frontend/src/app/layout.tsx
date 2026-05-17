@@ -6,8 +6,8 @@ import { AuthProvider } from '@/contexts/AuthContext';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'ShipShare - Save Money by Shipping Together',
-  description: 'Join thousands of Kenyans reducing shipping costs through group logistics. Save up to 60% on shipping fees.',
+  title: 'ContainerShare - Fill Empty Container Space',
+  description: 'A marketplace connecting shippers with spare container capacity to businesses that need affordable freight.',
 };
 
 export default function RootLayout({

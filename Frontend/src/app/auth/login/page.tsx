@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, Package, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Ship, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
@@ -47,7 +47,7 @@ export default function LoginPage() {
       <div className="relative w-full max-w-md">
         <Link href="/" className="flex items-center gap-2 mb-8 justify-center">
           <div className="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
-            <Package className="w-7 h-7 text-white" />
+            <Ship className="w-7 h-7 text-white" />
           </div>
           <span className="text-2xl font-bold text-surface-900">ShipShare</span>
         </Link>
@@ -55,7 +55,7 @@ export default function LoginPage() {
         <Card className="p-8">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-surface-900 mb-2">Welcome Back</h1>
-            <p className="text-surface-500">Sign in to your account to continue</p>
+            <p className="text-surface-500">Sign in to find or list container space</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

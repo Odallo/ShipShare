@@ -12,18 +12,6 @@ import { Navbar } from '@/components/layout/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
 import { ContainerListing, Booking, DashboardStats } from '@/types';
 
-const MOCK_LISTINGS: ContainerListing[] = [
-  { id: 'LST-001', shipperId: '1', shipperName: 'Maersk Logistics', shipperVerified: true, originPort: 'Shenzhen', destinationPort: 'Mombasa', containerType: '40HC', totalCbm: 76.3, availableCbm: 32, pricePerCbm: 42, departureDate: 'May 22, 2026', cutoffDate: 'May 18, 2026', shippingLine: 'Maersk', status: 'published', createdAt: '2026-05-01' },
-  { id: 'LST-002', shipperId: '1', shipperName: 'Maersk Logistics', shipperVerified: true, originPort: 'Ningbo', destinationPort: 'Mombasa', containerType: '40ft', totalCbm: 67.3, availableCbm: 18, pricePerCbm: 39, departureDate: 'May 28, 2026', cutoffDate: 'May 24, 2026', shippingLine: 'MSC', status: 'published', createdAt: '2026-05-03' },
-  { id: 'LST-003', shipperId: '1', shipperName: 'Maersk Logistics', shipperVerified: true, originPort: 'Shanghai', destinationPort: 'Dar es Salaam', containerType: '40HC', totalCbm: 76.3, availableCbm: 12, pricePerCbm: 45, departureDate: 'Jun 2, 2026', cutoffDate: 'May 29, 2026', shippingLine: 'CMA CGM', status: 'fully_booked', createdAt: '2026-04-28' },
-];
-
-const MOCK_BOOKINGS: Booking[] = [
-  { id: 'BKG-001', listingId: 'LST-001', fillerId: '2', fillerName: 'James Kariuki', cbmBooked: 5, totalPrice: 210, status: 'approved', createdAt: '2026-05-10' },
-  { id: 'BKG-002', listingId: 'LST-002', fillerId: '2', fillerName: 'Amina Hassan', cbmBooked: 8, totalPrice: 312, status: 'pending', createdAt: '2026-05-12' },
-  { id: 'BKG-003', listingId: 'LST-001', fillerId: '2', fillerName: 'Peter Otieno', cbmBooked: 3, totalPrice: 126, status: 'paid', createdAt: '2026-05-08' },
-];
-
 export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,7 +85,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {role === 'shipper' ? <ShipperDashboard /> : <FillerDashboard />}
+            {role === 'shipper' || role === 'both' ? <ShipperDashboard userId={currentUser.id} /> : <FillerDashboard />}
           </div>
         </main>
       </div>
@@ -105,9 +93,21 @@ export default function DashboardPage() {
   );
 }
 
-function ShipperDashboard() {
-  const listings = MOCK_LISTINGS;
-  const bookingRequests = MOCK_BOOKINGS;
+function ShipperDashboard({ userId }: { userId: string }) {
+  const [listings, setListings] = useState<ContainerListing[]>([]);
+  const [bookingRequests, setBookingRequests] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch(`/api/listings?shipperId=${userId}`).then(r => r.json()),
+      fetch('/api/bookings').then(r => r.json()),
+    ]).then(([listingsData, bookingsData]) => {
+      setListings(listingsData.listings || []);
+      setBookingRequests(bookingsData.bookings || []);
+    }).finally(() => setLoading(false));
+  }, [userId]);
+
   const stats: DashboardStats = {
     totalListings: listings.length,
     activeListings: listings.filter(l => l.status === 'published').length,
@@ -116,6 +116,26 @@ function ShipperDashboard() {
     totalEarned: bookingRequests.filter(b => b.status === 'paid' || b.status === 'shipped').reduce((a, b) => a + b.totalPrice, 0),
     moneySaved: 0,
   };
+
+  const handleApprove = async (bookingId: string) => {
+    await fetch(`/api/bookings/${bookingId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'approved' }),
+    });
+    setBookingRequests(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'approved' } : b));
+  };
+
+  const handleDecline = async (bookingId: string) => {
+    await fetch(`/api/bookings/${bookingId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'cancelled' }),
+    });
+    setBookingRequests(prev => prev.filter(b => b.id !== bookingId));
+  };
+
+  if (loading) return <div className="text-center py-12 text-surface-500">Loading dashboard...</div>;
 
   return (
     <>
@@ -211,12 +231,6 @@ function ShipperDashboard() {
                     </div>
                     <div className="sm:text-right sm:pl-4 sm:border-l border-surface-100">
                       <div className="text-sm text-surface-500">{listing.departureDate}</div>
-                      <Link href="/matching">
-                        <Button size="sm" variant="ghost" className="gap-1">
-                          <Eye className="w-3 h-3" />
-                          View
-                        </Button>
-                      </Link>
                     </div>
                   </div>
                 </Card>
@@ -237,7 +251,7 @@ function ShipperDashboard() {
               <Card key={booking.id} hover className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <div className="font-medium text-surface-900 text-sm">{booking.fillerName}</div>
+                    <div className="font-medium text-surface-900 text-sm">{booking.fillerName || 'Filler'}</div>
                     <div className="text-xs text-surface-500">{booking.cbmBooked} CBM — ${booking.totalPrice}</div>
                   </div>
                   <Badge variant={booking.status === 'pending' ? 'warning' : booking.status === 'approved' ? 'primary' : 'success'}>
@@ -246,8 +260,8 @@ function ShipperDashboard() {
                 </div>
                 {booking.status === 'pending' && (
                   <div className="flex gap-2 mt-3">
-                    <Button size="xs" variant="primary" className="text-xs py-1 px-3">Approve</Button>
-                    <Button size="xs" variant="secondary" className="text-xs py-1 px-3">Decline</Button>
+                    <Button size="sm" variant="primary" onClick={() => handleApprove(booking.id)}>Approve</Button>
+                    <Button size="sm" variant="secondary" onClick={() => handleDecline(booking.id)}>Decline</Button>
                   </div>
                 )}
               </Card>
@@ -272,13 +286,23 @@ function ShipperDashboard() {
 }
 
 function FillerDashboard() {
-  const bookings = MOCK_BOOKINGS;
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/bookings').then(r => r.json()).then(data => {
+      setBookings(data.bookings || []);
+    }).finally(() => setLoading(false));
+  }, []);
+
   const stats = {
     activeBookings: bookings.filter(b => b.status === 'approved' || b.status === 'paid').length,
     totalBookings: bookings.length,
     totalCbm: bookings.reduce((a, b) => a + b.cbmBooked, 0),
     totalSpent: bookings.filter(b => b.status === 'paid' || b.status === 'shipped').reduce((a, b) => a + b.totalPrice, 0),
   };
+
+  if (loading) return <div className="text-center py-12 text-surface-500">Loading dashboard...</div>;
 
   return (
     <>
@@ -349,37 +373,28 @@ function FillerDashboard() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {bookings.map((booking) => {
-                const listing = MOCK_LISTINGS.find(l => l.id === booking.listingId);
-                return (
-                  <Card key={booking.id} hover className="p-5">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 shrink-0">
-                          <Package className="w-6 h-6" />
+              {bookings.map((booking) => (
+                <Card key={booking.id} hover className="p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 shrink-0">
+                        <Package className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-surface-900">{booking.id}</span>
+                          <Badge variant={booking.status === 'pending' ? 'warning' : booking.status === 'approved' ? 'primary' : booking.status === 'paid' ? 'secondary' : 'success'}>
+                            {booking.status}
+                          </Badge>
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-surface-900">{booking.id}</span>
-                            <Badge variant={booking.status === 'pending' ? 'warning' : booking.status === 'approved' ? 'primary' : booking.status === 'paid' ? 'secondary' : 'success'}>
-                              {booking.status}
-                            </Badge>
-                          </div>
-                          {listing && (
-                            <div className="flex items-center gap-2 text-sm text-surface-500">
-                              <MapPin className="w-3 h-3" />
-                              {listing.originPort} → {listing.destinationPort}
-                            </div>
-                          )}
-                          <div className="text-xs text-surface-400 mt-1">
-                            {booking.cbmBooked} CBM — ${booking.totalPrice}
-                          </div>
+                        <div className="text-xs text-surface-400 mt-1">
+                          {booking.cbmBooked} CBM — ${booking.totalPrice}
                         </div>
                       </div>
                     </div>
-                  </Card>
-                );
-              })}
+                  </div>
+                </Card>
+              ))}
             </div>
           )}
         </div>

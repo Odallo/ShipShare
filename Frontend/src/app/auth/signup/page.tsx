@@ -3,11 +3,12 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, User, Phone, MapPin, Package, ArrowRight, Briefcase } from 'lucide-react';
+import { Mail, Lock, User, Phone, Ship, Search, ArrowRight, Briefcase, Award } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/types';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ export default function SignupPage() {
     phone: '',
     password: '',
     confirmPassword: '',
+    role: '' as UserRole | '',
     userType: 'individual' as 'individual' | 'business',
     businessName: '',
     businessRegistration: '',
@@ -52,6 +54,12 @@ export default function SignupPage() {
       return;
     }
 
+    if (!formData.role) {
+      setError('Please select your role');
+      setIsLoading(false);
+      return;
+    }
+
     if (formData.userType === 'business' && (!formData.businessName || !formData.businessRegistration)) {
       setError('Business name and registration number are required');
       setIsLoading(false);
@@ -63,6 +71,7 @@ export default function SignupPage() {
       email: formData.email,
       phone: formData.phone,
       password: formData.password,
+      role: formData.role as UserRole,
       userType: formData.userType,
       businessName: formData.businessName || undefined,
       businessRegistration: formData.businessRegistration || undefined,
@@ -85,7 +94,7 @@ export default function SignupPage() {
       <div className="relative w-full max-w-lg">
         <Link href="/" className="flex items-center gap-2 mb-8 justify-center">
           <div className="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
-            <Package className="w-7 h-7 text-white" />
+            <Ship className="w-7 h-7 text-white" />
           </div>
           <span className="text-2xl font-bold text-surface-900">ShipShare</span>
         </Link>
@@ -93,7 +102,7 @@ export default function SignupPage() {
         <Card className="p-8">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-surface-900 mb-2">Create Account</h1>
-            <p className="text-surface-500">Join thousands shipping smarter in Kenya</p>
+            <p className="text-surface-500">Start finding or listing container space</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -102,6 +111,31 @@ export default function SignupPage() {
                 {error}
               </div>
             )}
+
+            <div>
+              <label className="block text-sm font-semibold text-surface-700 mb-3">I want to...</label>
+              <div className="grid grid-cols-3 gap-3">
+                {([
+                  { value: 'shipper', label: 'List Space', icon: Ship },
+                  { value: 'filler', label: 'Book Space', icon: Search },
+                  { value: 'both', label: 'Both', icon: Award },
+                ] as const).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, role: opt.value })}
+                    className={`p-4 rounded-xl border-2 text-center transition-all ${
+                      formData.role === opt.value
+                        ? 'border-primary-500 bg-primary-50'
+                        : 'border-surface-200 hover:border-surface-300'
+                    }`}
+                  >
+                    <opt.icon className="w-6 h-6 mx-auto mb-2 text-surface-600" />
+                    <div className="font-medium text-surface-900 text-sm">{opt.label}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <button
@@ -115,7 +149,7 @@ export default function SignupPage() {
               >
                 <User className="w-6 h-6 mx-auto mb-2 text-surface-600" />
                 <div className="font-medium text-surface-900">Individual</div>
-                <div className="text-xs text-surface-500">Personal shipping</div>
+                <div className="text-xs text-surface-500">Personal account</div>
               </button>
 
               <button
@@ -129,7 +163,7 @@ export default function SignupPage() {
               >
                 <Briefcase className="w-6 h-6 mx-auto mb-2 text-surface-600" />
                 <div className="font-medium text-surface-900">Business</div>
-                <div className="text-xs text-surface-500">High volume</div>
+                <div className="text-xs text-surface-500">Company account</div>
               </button>
             </div>
 
