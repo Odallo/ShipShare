@@ -24,6 +24,7 @@ export default function CreateListingPage() {
   const [step, setStep] = useState(1);
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
   const [showCustomRoute, setShowCustomRoute] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     originPort: '',
     destinationPort: '',
@@ -56,35 +57,40 @@ export default function CreateListingPage() {
     });
   };
 
-  const handleSubmit = () => {
-    const existing = localStorage.getItem('containershare_listings');
-    const listings = existing ? JSON.parse(existing) : [];
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/listings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          originPort: formData.originPort,
+          destinationPort: formData.destinationPort,
+          containerType: formData.containerType,
+          totalCbm: Number(formData.totalCbm),
+          availableCbm: Number(formData.availableCbm),
+          pricePerCbm: Number(formData.pricePerCbm),
+          departureDate: formData.departureDate,
+          cutoffDate: formData.cutoffDate,
+          shippingLine: formData.shippingLine,
+          containerNumber: formData.containerNumber || undefined,
+          restrictions: formData.restrictions || undefined,
+        }),
+      });
 
-    const newListing = {
-      id: `LST-${String(listings.length + 1).padStart(3, '0')}`,
-      shipperId: '1',
-      shipperName: 'My Company',
-      shipperVerified: false,
-      originPort: formData.originPort,
-      destinationPort: formData.destinationPort,
-      containerType: formData.containerType,
-      totalCbm: Number(formData.totalCbm),
-      availableCbm: Number(formData.availableCbm),
-      pricePerCbm: Number(formData.pricePerCbm),
-      departureDate: formData.departureDate,
-      cutoffDate: formData.cutoffDate,
-      shippingLine: formData.shippingLine,
-      containerNumber: formData.containerNumber || undefined,
-      restrictions: formData.restrictions || undefined,
-      status: 'published',
-      createdAt: new Date().toISOString().split('T')[0],
-    };
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || 'Failed to create listing');
+        return;
+      }
 
-    listings.push(newListing);
-    localStorage.setItem('containershare_listings', JSON.stringify(listings));
-
-    alert('Container space listed! Fillers can now find and book your space.');
-    router.push('/dashboard');
+      alert('Container space listed! Fillers can now find and book your space.');
+      router.push('/dashboard');
+    } catch {
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -391,8 +397,8 @@ export default function CreateListingPage() {
 
                   <div className="flex justify-between">
                     <Button variant="secondary" onClick={() => setStep(3)}>Back</Button>
-                    <Button onClick={handleSubmit}>
-                      Publish Listing
+                    <Button onClick={handleSubmit} disabled={isSubmitting}>
+                      {isSubmitting ? 'Publishing...' : 'Publish Listing'}
                     </Button>
                   </div>
                 </div>
