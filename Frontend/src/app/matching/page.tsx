@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Search, ArrowRight, Ship, Calendar, DollarSign, Filter, Package, X, Users, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -9,6 +10,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Modal } from '@/components/ui/Modal';
+import { useAuth } from '@/contexts/AuthContext';
 import { KNOWN_PORTS, CONTAINER_CBM, ContainerType } from '@/types';
 
 interface MockListing {
@@ -38,33 +40,106 @@ const MOCK_LISTINGS: MockListing[] = [
 
 export default function MatchingPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [listings, setListings] = useState<MockListing[]>(MOCK_LISTINGS);
+  const [listingsLoading, setListingsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
   const [bookingListing, setBookingListing] = useState<MockListing | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cbmInput, setCbmInput] = useState('');
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingError, setBookingError] = useState('');
   const [searchOrigin, setSearchOrigin] = useState('');
   const [searchDest, setSearchDest] = useState('');
   const [selectedContainerType, setSelectedContainerType] = useState<string>('');
   const [priceMax, setPriceMax] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    fetch('/api/listings')
+      .then(r => r.json())
+      .then(data => {
+        if (data.listings?.length) {
+          const mapped = data.listings.map((l: Record<string, unknown>) => ({
+            id: l.id as string,
+            originPort: l.origin_port as string,
+            destinationPort: l.destination_port as string,
+            containerType: l.container_type as ContainerType,
+            availableCbm: l.available_cbm as number,
+            totalCbm: l.total_cbm as number,
+            pricePerCbm: l.price_per_cbm as number,
+            departureDate: l.departure_date as string,
+            cutoffDate: l.cutoff_date as string,
+            shippingLine: l.shipping_line as string,
+            status: (l.available_cbm as number) > 10 ? 'open' : 'closing',
+          }));
+          setListings(mapped);
+        }
+      })
+      .catch(() => setFetchError('Could not load live listings. Showing sample data.'))
+      .finally(() => setListingsLoading(false));
+  }, []);
+
   const handleBookSpace = (listing: MockListing) => {
+    if (!isAuthenticated) {
+      router.push('/auth/login');
+      return;
+    }
     setBookingListing(listing);
+    setCbmInput('');
+    setBookingError('');
     setIsModalOpen(true);
   };
 
-  const confirmBooking = () => {
-    alert(`Booking request sent for ${bookingListing?.id}! The shipper will confirm shortly.`);
-    setIsModalOpen(false);
+  const confirmBooking = async () => {
+    if (!bookingListing || !cbmInput || Number(cbmInput) < 1) {
+      setBookingError('Please enter a valid CBM amount');
+      return;
+    }
+    if (Number(cbmInput) > bookingListing.availableCbm) {
+      setBookingError(`Only ${bookingListing.availableCbm} CBM available`);
+      return;
+    }
+
+    setBookingLoading(true);
+    setBookingError('');
+
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          listingId: bookingListing.id,
+          cbmBooked: Number(cbmInput),
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        setBookingError(err.error || 'Booking failed');
+        return;
+      }
+
+      setIsModalOpen(false);
+      alert('Booking request sent! The shipper will confirm shortly.');
+    } catch {
+      setBookingError('Something went wrong. Please try again.');
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   const filteredListings = useMemo(() => {
-    return MOCK_LISTINGS.filter((l) => {
+    return listings.filter((l) => {
       if (searchOrigin && !l.originPort.toLowerCase().includes(searchOrigin.toLowerCase())) return false;
       if (searchDest && !l.destinationPort.toLowerCase().includes(searchDest.toLowerCase())) return false;
       if (selectedContainerType && l.containerType !== selectedContainerType) return false;
       if (priceMax && l.pricePerCbm > Number(priceMax)) return false;
       return true;
     });
-  }, [searchOrigin, searchDest, selectedContainerType, priceMax]);
+  }, [listings, searchOrigin, searchDest, selectedContainerType, priceMax]);
 
   const fillRate = (listing: MockListing) =>
     Math.round(((listing.totalCbm - listing.availableCbm) / listing.totalCbm) * 100);
@@ -177,6 +252,30 @@ export default function MatchingPage() {
               </div>
             </Card>
 
+            {listingsLoading && (
+              <div className="text-center py-8 text-surface-500">Loading available container space...</div>
+            )}
+
+            {!listingsLoading && fetchError && (
+              <div className="p-3 mb-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm">
+                {fetchError}
+              </div>
+            )}
+
+            {!listingsLoading && filteredListings.length === 0 && (
+              <Card className="p-12 text-center">
+                <Package className="w-12 h-12 text-surface-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-surface-900 mb-2">No space found</h3>
+                <p className="text-surface-500 mb-6">
+                  Try adjusting your search or check back later
+                </p>
+                <Link href="/shipments/create">
+                  <Button variant="secondary">List Your Space</Button>
+                </Link>
+              </Card>
+            )}
+
+            {!listingsLoading && (
             <div className="grid md:grid-cols-2 gap-4">
               {filteredListings.map((listing) => (
                 <Card key={listing.id} hover className="p-6">
@@ -242,18 +341,6 @@ export default function MatchingPage() {
                 </Card>
               ))}
             </div>
-
-            {filteredListings.length === 0 && (
-              <Card className="p-12 text-center">
-                <Package className="w-12 h-12 text-surface-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-surface-900 mb-2">No space found</h3>
-                <p className="text-surface-500 mb-6">
-                  Try adjusting your search or check back later
-                </p>
-                <Link href="/shipments/create">
-                  <Button variant="secondary">List Your Space</Button>
-                </Link>
-              </Card>
             )}
 
             <div className="mt-8 bg-gradient-to-r from-primary-50 to-secondary-50 rounded-xl p-6 border border-primary-100">
@@ -333,6 +420,12 @@ export default function MatchingPage() {
               </p>
             </div>
 
+            {bookingError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                {bookingError}
+              </div>
+            )}
+
             <div className="flex gap-4 items-end">
               <div className="flex-1">
                 <label className="block text-sm font-medium text-surface-700 mb-1">CBM needed</label>
@@ -340,16 +433,18 @@ export default function MatchingPage() {
                   type="number"
                   placeholder="e.g. 5"
                   max={bookingListing.availableCbm}
+                  value={cbmInput}
+                  onChange={(e) => setCbmInput(e.target.value)}
                   className="input-field w-full"
                 />
               </div>
-              <Button onClick={confirmBooking}>
-                Send Request
+              <Button onClick={confirmBooking} disabled={bookingLoading}>
+                {bookingLoading ? 'Sending...' : 'Send Request'}
               </Button>
             </div>
 
             <div className="flex gap-3">
-              <Button variant="secondary" onClick={() => setIsModalOpen(false)} className="flex-1">
+              <Button variant="secondary" onClick={() => setIsModalOpen(false)} className="flex-1" disabled={bookingLoading}>
                 Cancel
               </Button>
             </div>

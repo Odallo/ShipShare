@@ -96,7 +96,7 @@ export default function SignupPage() {
           <div className="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
             <Ship className="w-7 h-7 text-white" />
           </div>
-          <span className="text-2xl font-bold text-surface-900">ShipShare</span>
+          <span className="text-2xl font-bold text-surface-900">ContainerShare</span>
         </Link>
 
         <Card className="p-8">
