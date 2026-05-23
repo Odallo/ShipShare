@@ -10,29 +10,36 @@ export async function GET(request: Request) {
   const shipperId = searchParams.get('shipperId');
   const status = searchParams.get('status') || 'published';
 
-  let query = supabase
-    .from('container_listings')
-    .select('*, profiles!inner(name, verified, trust_score)')
-    .gte('available_cbm', 1)
-    .order('departure_date', { ascending: true });
+  try {
+    let query = supabase
+      .from('container_listings')
+      .select('*, profiles(name, verified, trust_score)')
+      .gte('available_cbm', 1)
+      .order('departure_date', { ascending: true });
 
-  if (shipperId) {
-    query = query.eq('shipper_id', shipperId);
-  } else {
-    query = query.eq('status', status);
+    if (shipperId) {
+      query = query.eq('shipper_id', shipperId);
+    } else {
+      query = query.eq('status', status);
+    }
+    if (origin) query = query.ilike('origin_port', `%${origin}%`);
+    if (dest) query = query.ilike('destination_port', `%${dest}%`);
+    if (containerType) query = query.eq('container_type', containerType);
+    if (priceMax) query = query.lte('price_per_cbm', Number(priceMax));
+
+    const { data, error } = await query;
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ listings: data || [] });
+  } catch (err) {
+    return NextResponse.json(
+      { error: 'Database unavailable. Please check your Supabase project is running.' },
+      { status: 503 }
+    );
   }
-  if (origin) query = query.ilike('origin_port', `%${origin}%`);
-  if (dest) query = query.ilike('destination_port', `%${dest}%`);
-  if (containerType) query = query.eq('container_type', containerType);
-  if (priceMax) query = query.lte('price_per_cbm', Number(priceMax));
-
-  const { data, error } = await query;
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ listings: data });
 }
 
 export async function POST(request: Request) {
