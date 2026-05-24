@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   ArrowRight, 
@@ -129,6 +129,37 @@ const FEATURES = [
 ];
 
 export default function LandingPage() {
+  const [liveListings, setLiveListings] = useState<typeof MOCK_LISTINGS>([]);
+  const [listingsLoaded, setListingsLoaded] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/listings')
+      .then(r => r.json())
+      .then(data => {
+        if (data.listings?.length) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const mapped = data.listings.slice(0, 3).map((l: any) => ({
+            id: l.id,
+            origin: l.origin_port,
+            destination: l.destination_port,
+            containerType: l.container_type,
+            availableCbm: l.available_cbm,
+            totalCbm: l.total_cbm,
+            pricePerCbm: l.price_per_cbm,
+            departureDate: (l.departure_date || '').split('T')[0],
+            shippingLine: l.shipping_line,
+            fillRate: Math.round(((l.total_cbm - l.available_cbm) / l.total_cbm) * 100),
+            status: 'open' as const,
+          }));
+          setLiveListings(mapped);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setListingsLoaded(true));
+  }, []);
+
+  const displayListings = listingsLoaded && liveListings.length > 0 ? liveListings : MOCK_LISTINGS;
+
   return (
     <>
       <Navbar />
@@ -193,7 +224,7 @@ export default function LandingPage() {
                   <Badge variant="primary">Live</Badge>
                 </div>
                 <div className="space-y-4">
-                  {MOCK_LISTINGS.map((listing) => (
+                  {displayListings.map((listing) => (
                     <div key={listing.id} className="p-4 rounded-xl bg-surface-50 border border-surface-100 hover:shadow-card transition-shadow">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
@@ -328,7 +359,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {MOCK_LISTINGS.map((listing) => (
+            {displayListings.map((listing) => (
               <Card key={listing.id} hover className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
