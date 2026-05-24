@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await supabase.from('profiles').insert({
+    const { error: profileError } = await supabaseAdmin.from('profiles').insert({
       id: user.id,
       name: body.name,
       email: body.email,
@@ -45,6 +45,13 @@ export async function POST(request: NextRequest) {
       business_name: body.businessName,
       business_registration: body.businessRegistration,
     });
+
+    if (profileError) {
+      return NextResponse.json(
+        { error: 'Profile creation failed: ' + profileError.message },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       user: {
