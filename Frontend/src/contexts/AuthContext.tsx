@@ -2,6 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '@/types';
+import { createBrowserSupabase } from '@/lib/supabase';
+
+const browserSupabase = typeof window !== 'undefined' ? createBrowserSupabase() : null;
 
 interface SignupData {
   name: string;
@@ -51,6 +54,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    const { error: signInError } = await browserSupabase!.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) {
+      console.error('Login error:', signInError.message);
+      return false;
+    }
+
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -59,8 +72,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        console.error('Login error:', error.error);
         return false;
       }
 
@@ -89,6 +100,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const data = await response.json();
       persistUser(data.user);
+
+      const { error: signInError } = await browserSupabase!.auth.signInWithPassword({
+        email: userData.email,
+        password: userData.password,
+      });
+
+      if (signInError) {
+        console.error('Auto sign-in after signup failed:', signInError.message);
+      }
+
       return true;
     } catch (error) {
       console.error('Signup failed:', error);
@@ -97,6 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
+    await browserSupabase?.auth.signOut();
     try {
       await fetch('/api/auth/logout', {
         method: 'POST',
