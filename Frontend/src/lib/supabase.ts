@@ -6,16 +6,16 @@ function getAnonKey() { return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!; }
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 
-export function getSupabase() {
+function getSupabase() {
   if (!_supabase) _supabase = createClient(getUrl(), getAnonKey());
   return _supabase;
 }
 
-export const supabase = getSupabase();
+export const supabase = typeof window === 'undefined' ? getSupabase() : (null as unknown as ReturnType<typeof createClient>);
 
 let _supabaseAdmin: ReturnType<typeof createClient> | null = null;
 
-export function getSupabaseAdmin() {
+function getSupabaseAdmin() {
   if (!_supabaseAdmin) _supabaseAdmin = createClient(getUrl(), process.env.SUPABASE_SERVICE_KEY!);
   return _supabaseAdmin;
 }

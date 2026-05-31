@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       user: {
         id: user.id,
         name: profile?.name || user.user_metadata?.name || '',
@@ -46,6 +46,21 @@ export async function POST(request: NextRequest) {
         trustScore: profile?.trust_score || 0,
       },
     });
+
+    if (data.session?.access_token) {
+      response.cookies.set('sb-access-token', data.session.access_token, {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'lax',
+      });
+      response.cookies.set('sb-refresh-token', data.session.refresh_token, {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'lax',
+      });
+    }
+
+    return response;
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },

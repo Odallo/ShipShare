@@ -42,13 +42,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem(STORAGE_KEY);
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-        setIsAuthenticated(true);
-      }
-    }
+    if (typeof window === 'undefined') return;
+
+    fetch('/api/auth/me')
+      .then(res => res.ok ? res.json() : { user: null })
+      .then(data => {
+        if (data.user) {
+          persistUser(data.user);
+        } else {
+          const storedUser = localStorage.getItem(STORAGE_KEY);
+          if (storedUser) {
+            setUser(JSON.parse(storedUser));
+            setIsAuthenticated(true);
+          }
+        }
+      })
+      .catch(() => {
+        const storedUser = localStorage.getItem(STORAGE_KEY);
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+          setIsAuthenticated(true);
+        }
+      });
   }, []);
 
   const persistUser = (u: User) => {
@@ -60,16 +75,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    const { error: signInError } = await getBrowserSupabase()!.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (signInError) {
-      console.error('Login error:', signInError.message);
-      return false;
-    }
-
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -77,9 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!response.ok) {
-        return false;
-      }
+      if (!response.ok) return false;
 
       const data = await response.json();
       persistUser(data.user);
@@ -106,16 +109,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const data = await response.json();
       persistUser(data.user);
-
-      const { error: signInError } = await getBrowserSupabase()!.auth.signInWithPassword({
-        email: userData.email,
-        password: userData.password,
-      });
-
-      if (signInError) {
-        console.error('Auto sign-in after signup failed:', signInError.message);
-      }
-
       return true;
     } catch (error) {
       console.error('Signup failed:', error);
