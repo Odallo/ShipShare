@@ -1,11 +1,19 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getServerUser, getAuthenticatedClient } from '@/lib/server-supabase';
 
 export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const token = request.headers.get('cookie')?.split(';')
+    .find(c => c.trim().startsWith('sb-access-token='))
+    ?.split('=')[1];
+  const { data: { user }, error: authError } = await getServerUser(token);
+  if (authError || !user || !token) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const supabase = getAuthenticatedClient(token);
   if (authError || !user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

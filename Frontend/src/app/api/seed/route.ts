@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getServerUser, getAuthenticatedClient } from '@/lib/server-supabase';
 
-export async function POST() {
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) {
+export async function POST(request: Request) {
+  const token = request.headers.get('cookie')?.split(';')
+    .find(c => c.trim().startsWith('sb-access-token='))
+    ?.split('=')[1];
+  const { data: { user }, error: authError } = await getServerUser(token);
+  if (authError || !user || !token) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const supabase = getAuthenticatedClient(token);
 
   const sampleListings = [
     {

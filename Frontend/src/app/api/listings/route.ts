@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { createServerSupabase } from '@/lib/server-supabase';
+import { getServerUser, getAuthenticatedClient } from '@/lib/server-supabase';
+
+function getToken(request: Request) {
+  return request.headers.get('cookie')?.split(';')
+    .find(c => c.trim().startsWith('sb-access-token='))
+    ?.split('=')[1];
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -9,7 +14,9 @@ export async function GET(request: Request) {
   const containerType = searchParams.get('containerType');
   const priceMax = searchParams.get('priceMax');
   const shipperId = searchParams.get('shipperId');
-  const status = searchParams.get('status') || 'published';
+
+  const token = getToken(request);
+  const supabase = getAuthenticatedClient(token || '');
 
   try {
     let query = supabase
@@ -21,7 +28,7 @@ export async function GET(request: Request) {
     if (shipperId) {
       query = query.eq('shipper_id', shipperId);
     } else {
-      query = query.eq('status', status);
+      query = query.eq('status', 'published');
     }
     if (origin) query = query.ilike('origin_port', `%${origin}%`);
     if (dest) query = query.ilike('destination_port', `%${dest}%`);
@@ -44,13 +51,14 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const serverSupabase = createServerSupabase();
-  const { data: { user }, error: authError } = await serverSupabase.auth.getUser();
-
-  if (authError || !user) {
+  const token = getToken(request);
+  const { data: { user }, error: authError } = await getServerUser(token);
+  if (authError || !user || !token) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const supabase = getAuthenticatedClient(token);
+  const body = await request.json();
 
   const { data, error } = await supabase
     .from('container_listings')

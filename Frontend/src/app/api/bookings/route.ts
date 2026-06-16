@@ -1,31 +1,70 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getServerUser, getAuthenticatedClient } from '@/lib/server-supabase';
+
+function getToken(request: Request) {
+  return request.headers.get('cookie')?.split(';')
+    .find(c => c.trim().startsWith('sb-access-token='))
+    ?.split('=')[1];
+}
 
 export async function GET(request: Request) {
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) {
+  const token = getToken(request);
+  const { data: { user }, error: authError } = await getServerUser(token);
+  if (authError || !user || !token) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { data, error } = await supabase
+  const supabase = getAuthenticatedClient(token);
+
+  const { data: fillerData, error: fillerErr } = await supabase
     .from('bookings')
     .select('*, container_listings(*)')
-    .or(`filler_id.eq.${user.id},and(container_listings.shipper_id.eq.${user.id})`)
+    .eq('filler_id', user.id)
     .order('created_at', { ascending: false });
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (fillerErr) {
+    return NextResponse.json({ error: fillerErr.message }, { status: 500 });
   }
 
-  return NextResponse.json({ bookings: data });
+  const { data: listings } = await supabase
+    .from('container_listings')
+    .select('id')
+    .eq('shipper_id', user.id);
+
+  const listingIds = (listings || []).map(l => l.id);
+  let shipperData: any[] = [];
+
+  if (listingIds.length > 0) {
+    const { data, error: sErr } = await supabase
+      .from('bookings')
+      .select('*, container_listings(*)')
+      .in('listing_id', listingIds)
+      .order('created_at', { ascending: false });
+
+    if (sErr) {
+      return NextResponse.json({ error: sErr.message }, { status: 500 });
+    }
+    shipperData = data || [];
+  }
+
+  const seen = new Set<string>();
+  const bookings = [...(fillerData || []), ...shipperData].filter(b => {
+    if (seen.has(b.id)) return false;
+    seen.add(b.id);
+    return true;
+  });
+
+  return NextResponse.json({ bookings });
 }
 
 export async function POST(request: Request) {
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) {
+  const token = getToken(request);
+  const { data: { user }, error: authError } = await getServerUser(token);
+  if (authError || !user || !token) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const supabase = getAuthenticatedClient(token);
   const body = await request.json();
 
   const { data: listing } = await supabase

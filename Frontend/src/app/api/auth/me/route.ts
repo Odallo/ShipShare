@@ -1,31 +1,34 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/server-supabase';
+import { getServerUser, getAuthenticatedClient } from '@/lib/server-supabase';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const supabase = createServerSupabase();
-    const { data: { session } } = await supabase.auth.getSession();
+    const token = request.headers.get('cookie')?.split(';')
+      .find(c => c.trim().startsWith('sb-access-token='))
+      ?.split('=')[1];
+    const { data: { user }, error: authError } = await getServerUser(token);
 
-    if (!session?.user) {
+    if (authError || !user || !token) {
       return NextResponse.json({ user: null }, { status: 401 });
     }
 
+    const supabase = getAuthenticatedClient(token);
     const { data: profile } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single();
 
     return NextResponse.json({
       user: {
-        id: session.user.id,
-        name: profile?.name || session.user.user_metadata?.name || '',
-        email: session.user.email,
-        phone: profile?.phone || session.user.user_metadata?.phone || '',
-        role: profile?.role || session.user.user_metadata?.role || 'filler',
-        userType: profile?.user_type || session.user.user_metadata?.user_type || 'individual',
-        businessName: profile?.business_name || session.user.user_metadata?.business_name,
-        businessRegistration: profile?.business_registration || session.user.user_metadata?.business_registration,
+        id: user.id,
+        name: profile?.name || user.user_metadata?.name || '',
+        email: user.email,
+        phone: profile?.phone || user.user_metadata?.phone || '',
+        role: profile?.role || user.user_metadata?.role || 'filler',
+        userType: profile?.user_type || user.user_metadata?.user_type || 'individual',
+        businessName: profile?.business_name || user.user_metadata?.business_name,
+        businessRegistration: profile?.business_registration || user.user_metadata?.business_registration,
         location: profile?.location,
         verified: profile?.verified || false,
         trustScore: profile?.trust_score || 0,

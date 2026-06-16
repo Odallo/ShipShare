@@ -27,6 +27,7 @@ interface SignupData {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isInitializing: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   signup: (userData: SignupData) => Promise<boolean>;
   logout: () => void;
@@ -40,6 +41,7 @@ const STORAGE_KEY = 'containershare_user';
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -63,7 +65,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(JSON.parse(storedUser));
           setIsAuthenticated(true);
         }
-      });
+      })
+      .finally(() => setIsInitializing(false));
   }, []);
 
   const persistUser = (u: User) => {
@@ -140,7 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, signup, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, isInitializing, login, signup, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
