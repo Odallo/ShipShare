@@ -24,3 +24,7 @@ export function getAuthenticatedClient(jwt: string) {
     global: { headers: { Authorization: `Bearer ${jwt}` } },
   });
 }
+
+export function getServiceClient() {
+  return createClient(SBP_URL, process.env.SUPABASE_SERVICE_KEY!);
+}

@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { getServerUser, getAuthenticatedClient } from '@/lib/server-supabase';
+
+const SBP_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SBP_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const publicSupabase = createClient(SBP_URL, SBP_ANON_KEY);
 
 function getToken(request: Request) {
   return request.headers.get('cookie')?.split(';')
@@ -16,7 +21,7 @@ export async function GET(request: Request) {
   const shipperId = searchParams.get('shipperId');
 
   const token = getToken(request);
-  const supabase = getAuthenticatedClient(token || '');
+  const supabase = token ? getAuthenticatedClient(token) : publicSupabase;
 
   try {
     let query = supabase

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getServerUser, getAuthenticatedClient } from '@/lib/server-supabase';
+import { getServerUser, getAuthenticatedClient, getServiceClient } from '@/lib/server-supabase';
 
 export async function PATCH(
   request: Request,
@@ -14,23 +14,34 @@ export async function PATCH(
   }
 
   const supabase = getAuthenticatedClient(token);
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
 
   const body = await request.json();
 
-  const { data: booking } = await supabase
+  const { data: booking, error: bErr } = await supabase
     .from('bookings')
-    .select('*, container_listings!inner(shipper_id)')
+    .select('*')
     .eq('id', params.id)
     .single();
+
+  if (bErr) {
+    return NextResponse.json({ error: bErr.message }, { status: 500 });
+  }
 
   if (!booking) {
     return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
   }
 
-  const isShipper = booking.container_listings.shipper_id === user.id;
+  const { data: listing, error: lErr } = await supabase
+    .from('container_listings')
+    .select('shipper_id')
+    .eq('id', booking.listing_id)
+    .single();
+
+  if (lErr) {
+    return NextResponse.json({ error: lErr.message }, { status: 500 });
+  }
+
+  const isShipper = listing?.shipper_id === user.id;
   const isFiller = booking.filler_id === user.id;
 
   if (body.status === 'approved' && !isShipper) {
@@ -41,62 +52,71 @@ export async function PATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
+  const serviceSupabase = getServiceClient();
   const listingId = booking.listing_id;
   const cbmBooked = booking.cbm_booked;
 
   if (body.status === 'approved') {
-    const { data: listing } = await supabase
+    const { data: listingData, error: adErr } = await serviceSupabase
       .from('container_listings')
       .select('available_cbm')
       .eq('id', listingId)
       .single();
 
-    if (!listing) {
+    if (adErr) {
+      return NextResponse.json({ error: adErr.message }, { status: 500 });
+    }
+
+    if (!listingData) {
       return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
     }
 
-    const newAvailable = listing.available_cbm - cbmBooked;
+    const newAvailable = listingData.available_cbm - cbmBooked;
     const updates: Record<string, unknown> = { available_cbm: newAvailable };
     if (newAvailable <= 0) {
       updates.status = 'fully_booked';
       updates.available_cbm = 0;
     }
 
-    await supabase
+    await serviceSupabase
       .from('container_listings')
       .update(updates)
       .eq('id', listingId);
   }
 
   if (body.status === 'cancelled' && (booking.status === 'approved' || booking.status === 'pending')) {
-    const { data: listing } = await supabase
+    const { data: listingData } = await serviceSupabase
       .from('container_listings')
       .select('available_cbm, status')
       .eq('id', listingId)
       .single();
 
-    if (listing) {
-      const newAvailable = listing.available_cbm + cbmBooked;
-      await supabase
+    if (listingData) {
+      const newAvailable = listingData.available_cbm + cbmBooked;
+      await serviceSupabase
         .from('container_listings')
         .update({
           available_cbm: newAvailable,
-          status: newAvailable > 0 ? 'published' : listing.status,
+          status: newAvailable > 0 ? 'published' : listingData.status,
         })
         .eq('id', listingId);
     }
   }
 
-  const { data, error } = await supabase
+  const { error: updErr } = await serviceSupabase
     .from('bookings')
     .update({ status: body.status })
-    .eq('id', params.id)
-    .select()
-    .single();
+    .eq('id', params.id);
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (updErr) {
+    return NextResponse.json({ error: updErr.message }, { status: 500 });
   }
 
-  return NextResponse.json({ booking: data });
+  const { data: updatedBooking } = await serviceSupabase
+    .from('bookings')
+    .select('*')
+    .eq('id', params.id)
+    .single();
+
+  return NextResponse.json({ booking: updatedBooking });
 }
