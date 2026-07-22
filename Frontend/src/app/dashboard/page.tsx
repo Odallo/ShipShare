@@ -582,7 +582,7 @@ function BookingCard({ booking, index }: { booking: Booking; index: number }) {
 
 function BookingDetailCard({ booking, index }: { booking: Booking; index: number }) {
   const statusVariant = booking.status === 'pending' ? 'warning' : booking.status === 'approved' ? 'primary' : booking.status === 'paid' ? 'success' : booking.status === 'cancelled' ? 'secondary' : 'success';
-  const statusIcon = booking.status === 'cancelled' ? XCircle : booking.status === 'approved' ? CheckCircle2 : booking.status === 'paid' ? CheckCircle2 : AlertCircle;
+  const StatusIcon = booking.status === 'cancelled' ? XCircle : booking.status === 'approved' ? CheckCircle2 : booking.status === 'paid' ? CheckCircle2 : AlertCircle;
 
   return (
     <Card className="p-4 slide-up" style={{ animationDelay: `${index * 50}ms` }}>
@@ -593,7 +593,7 @@ function BookingDetailCard({ booking, index }: { booking: Booking; index: number
             booking.status === 'approved' || booking.status === 'paid' ? 'bg-green-100 text-green-600' :
             'bg-orange-100 text-orange-600'
           }`}>
-            <statusIcon className="w-5 h-5" />
+            <StatusIcon className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -612,7 +612,7 @@ function BookingDetailCard({ booking, index }: { booking: Booking; index: number
 }
 
 function BookingRequestCard({ booking }: { booking: Booking }) {
-  const statusIcon = booking.status === 'cancelled' ? XCircle : booking.status === 'approved' ? CheckCircle2 : AlertCircle;
+  const StatusIcon = booking.status === 'cancelled' ? XCircle : booking.status === 'approved' ? CheckCircle2 : AlertCircle;
 
   return (
     <Card className="p-4">
@@ -623,7 +623,7 @@ function BookingRequestCard({ booking }: { booking: Booking }) {
             booking.status === 'approved' ? 'bg-green-100 text-green-600' :
             'bg-orange-100 text-orange-600'
           }`}>
-            <statusIcon className="w-5 h-5" />
+            <StatusIcon className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">

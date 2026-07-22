@@ -28,7 +28,7 @@ export async function PATCH(
   }
 
   const body = await request.json();
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('container_listings')
     .update(body)
     .eq('id', params.id)

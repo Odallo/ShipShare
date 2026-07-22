@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { error: profileError } = await supabaseAdmin.from('profiles').insert({
+    const { error: profileError } = await (supabaseAdmin.from('profiles') as any).insert({
       id: user.id,
       name: body.name,
       email: body.email,

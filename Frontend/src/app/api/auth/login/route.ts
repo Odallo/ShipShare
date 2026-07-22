@@ -25,11 +25,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: profile } = await supabase
+    const profile = (await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single();
+      .single()).data as Record<string, unknown> | null;
 
     const response = NextResponse.json({
       user: {

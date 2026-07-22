@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Footer } from '@/components/layout/Footer';
-import { Navbar } from '@/components/layout/Navbar';
+import { CardNav } from '@/components/layout/CardNav/CardNav';
 
 const MOCK_LISTINGS = [
   {
@@ -162,9 +162,46 @@ export default function LandingPage() {
 
   return (
     <>
-      <Navbar />
+      <CardNav
+        logo="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23111'%3E%3Cpath d='M2 21V3h6v18H2zm7 0V7h6v14H9zm7-10v10h6V11h-6z'/%3E%3C/svg%3E"
+        logoAlt="ShipShare"
+        items={[
+          {
+            label: 'About',
+            bgColor: '#1B1722',
+            textColor: '#fff',
+            links: [
+              { label: 'How It Works', href: '/how-it-works', ariaLabel: 'How It Works' },
+              { label: 'Pricing', href: '/pricing', ariaLabel: 'Pricing' },
+            ],
+          },
+          {
+            label: 'Explore',
+            bgColor: '#2F293A',
+            textColor: '#fff',
+            links: [
+              { label: 'Find Space', href: '/matching', ariaLabel: 'Find Container Space' },
+              { label: 'List Space', href: '/shipments/create', ariaLabel: 'List Your Space' },
+            ],
+          },
+          {
+            label: 'Account',
+            bgColor: '#2F293A',
+            textColor: '#fff',
+            links: [
+              { label: 'Dashboard', href: '/dashboard', ariaLabel: 'Dashboard' },
+              { label: 'Profile', href: '/profile', ariaLabel: 'Profile' },
+            ],
+          },
+        ]}
+        baseColor="#fff"
+        menuColor="#000"
+        buttonBgColor="#111"
+        buttonTextColor="#fff"
+        ease="power3.out"
+      />
       
-      <section className="relative min-h-screen flex items-center overflow-hidden bg-surface-50 pt-16 lg:pt-20">
+      <section className="relative min-h-screen flex items-center overflow-hidden bg-surface-50">
         <div className="blob blob-primary w-[500px] h-[500px] -top-32 -left-32 animate-pulse-slow" />
         <div className="blob blob-secondary w-[400px] h-[400px] top-1/2 -right-32 animate-pulse-slow" style={{ animationDelay: '2s' }} />
         
