@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Search, ArrowRight, Ship, Calendar, DollarSign, Filter, Package, X, Users, Clock } from 'lucide-react';
@@ -57,30 +57,51 @@ export default function MatchingPage() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
+  const buildFilterQuery = () => {
+    const params = new URLSearchParams();
+    if (searchOrigin) params.set('origin', searchOrigin);
+    if (searchDest) params.set('destination', searchDest);
+    if (selectedContainerType) params.set('containerType', selectedContainerType);
+    if (priceMax) params.set('priceMax', priceMax);
+    return params.toString();
+  };
+
+  const fetchListings = useCallback(async () => {
+    setListingsLoading(true);
+    setFetchError('');
+    const qs = buildFilterQuery();
+    try {
+      const res = await fetch(`/api/listings${qs ? `?${qs}` : ''}`);
+      const data = await res.json();
+      if (data.listings?.length) {
+        const mapped = data.listings.map((l: Record<string, unknown>) => ({
+          id: l.id as string,
+          originPort: l.origin_port as string,
+          destinationPort: l.destination_port as string,
+          containerType: l.container_type as ContainerType,
+          availableCbm: l.available_cbm as number,
+          totalCbm: l.total_cbm as number,
+          pricePerCbm: l.price_per_cbm as number,
+          departureDate: l.departure_date as string,
+          cutoffDate: l.cutoff_date as string,
+          shippingLine: l.shipping_line as string,
+          status: (l.available_cbm as number) > 10 ? 'open' : 'closing',
+        }));
+        setListings(mapped);
+      } else {
+        setListings([]);
+      }
+    } catch {
+      setFetchError('Could not load live listings. Showing sample data.');
+      setListings(MOCK_LISTINGS);
+    } finally {
+      setListingsLoading(false);
+    }
+  }, [searchOrigin, searchDest, selectedContainerType, priceMax]);
+
   useEffect(() => {
-    fetch('/api/listings')
-      .then(r => r.json())
-      .then(data => {
-        if (data.listings?.length) {
-          const mapped = data.listings.map((l: Record<string, unknown>) => ({
-            id: l.id as string,
-            originPort: l.origin_port as string,
-            destinationPort: l.destination_port as string,
-            containerType: l.container_type as ContainerType,
-            availableCbm: l.available_cbm as number,
-            totalCbm: l.total_cbm as number,
-            pricePerCbm: l.price_per_cbm as number,
-            departureDate: l.departure_date as string,
-            cutoffDate: l.cutoff_date as string,
-            shippingLine: l.shipping_line as string,
-            status: (l.available_cbm as number) > 10 ? 'open' : 'closing',
-          }));
-          setListings(mapped);
-        }
-      })
-      .catch(() => setFetchError('Could not load live listings. Showing sample data.'))
-      .finally(() => setListingsLoading(false));
-  }, []);
+    fetchListings();
+  }, [fetchListings]);
 
   const handleBookSpace = (listing: MockListing) => {
     if (!isAuthenticated) {
@@ -130,16 +151,6 @@ export default function MatchingPage() {
       setBookingLoading(false);
     }
   };
-
-  const filteredListings = useMemo(() => {
-    return listings.filter((l) => {
-      if (searchOrigin && !l.originPort.toLowerCase().includes(searchOrigin.toLowerCase())) return false;
-      if (searchDest && !l.destinationPort.toLowerCase().includes(searchDest.toLowerCase())) return false;
-      if (selectedContainerType && l.containerType !== selectedContainerType) return false;
-      if (priceMax && l.pricePerCbm > Number(priceMax)) return false;
-      return true;
-    });
-  }, [listings, searchOrigin, searchDest, selectedContainerType, priceMax]);
 
   const fillRate = (listing: MockListing) =>
     Math.round(((listing.totalCbm - listing.availableCbm) / listing.totalCbm) * 100);
@@ -262,7 +273,7 @@ export default function MatchingPage() {
               </div>
             )}
 
-            {!listingsLoading && filteredListings.length === 0 && (
+            {!listingsLoading && listings.length === 0 && (
               <Card className="p-12 text-center">
                 <Package className="w-12 h-12 text-surface-300 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-surface-900 mb-2">No space found</h3>
@@ -277,7 +288,7 @@ export default function MatchingPage() {
 
             {!listingsLoading && (
             <div className="grid md:grid-cols-2 gap-4">
-              {filteredListings.map((listing) => (
+              {listings.map((listing) => (
                 <Card key={listing.id} hover className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>

@@ -2,6 +2,15 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  const isCreatePage = pathname === '/shipments/create';
+  const isDetailPage = /^\/shipments\/(?!create$)[^/]+$/.test(pathname);
+
+  if (isDetailPage) {
+    return NextResponse.next();
+  }
+
   const accessToken = request.cookies.get('sb-access-token')?.value;
   const refreshToken = request.cookies.get('sb-refresh-token')?.value;
 

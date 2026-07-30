@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  Ship, Package, DollarSign, Plus, MapPin, ArrowRight, Clock,
+  Ship, Package, DollarSign, Plus, MapPin, ArrowRight, Clock, Pencil,
   LogOut, Search, TrendingUp, Container, BarChart3, Activity,
   Calendar, Users, ChevronRight, Eye, CheckCircle2, XCircle,
   AlertCircle, Box, ArrowUpRight, ArrowDownRight, LayoutGrid,
@@ -511,6 +511,11 @@ function ListingDetailCard({ listing, index }: { listing: ContainerListing; inde
       <div className="flex items-start justify-between mb-3">
         <Badge variant={statusVariant}>{listing.status.replace('_', ' ')}</Badge>
         <div className="flex gap-2">
+          <Link href={`/shipments/create?editId=${listing.id}`}>
+            <Button size="sm" variant="ghost" title="Edit">
+              <Pencil className="w-4 h-4" />
+            </Button>
+          </Link>
           <Link href={`/shipments/${listing.id}`}>
             <Button size="sm" variant="ghost">
               <Eye className="w-4 h-4" />

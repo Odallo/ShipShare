@@ -33,3 +33,6 @@ logs
 
 # OS
 Thumbs.db
+
+# Documentation files (not needed in repo)
+*.md

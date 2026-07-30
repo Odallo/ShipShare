@@ -42,3 +42,38 @@ export async function PATCH(
 
   return NextResponse.json({ listing: data });
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { data: listing } = await (supabase as any)
+    .from('container_listings')
+    .select('shipper_id')
+    .eq('id', params.id)
+    .single();
+
+  if (!listing || !(listing as Record<string, unknown>).shipper_id) {
+    return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
+  }
+
+  if ((listing as Record<string, unknown>).shipper_id !== user.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
+
+  const { error: delErr } = await supabase
+    .from('container_listings')
+    .delete()
+    .eq('id', params.id);
+
+  if (delErr) {
+    return NextResponse.json({ error: delErr.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}

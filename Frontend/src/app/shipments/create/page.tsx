@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Ship, MapPin, Calendar, ArrowRight, Package, DollarSign, Container } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -38,7 +38,41 @@ export default function CreateListingPage() {
     containerNumber: '',
     restrictions: '',
   });
+  const searchParams = useSearchParams();
+  const editId = searchParams.get('editId');
+  const isEditMode = !!editId;
+  const [editLoading, setEditLoading] = useState(isEditMode);
   const router = useRouter();
+
+  useEffect(() => {
+    if (!editId) return;
+    fetch(`/api/listings/${editId}`)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.listing) return;
+        const l = data.listing;
+        setFormData({
+          originPort: l.origin_port || '',
+          destinationPort: l.destination_port || '',
+          containerType: l.container_type || '',
+          totalCbm: String(l.total_cbm || ''),
+          availableCbm: String(l.available_cbm || ''),
+          pricePerCbm: String(l.price_per_cbm || ''),
+          departureDate: l.departure_date || '',
+          cutoffDate: l.cutoff_date || '',
+          shippingLine: l.shipping_line || '',
+          containerNumber: l.container_number || '',
+          restrictions: l.restrictions || '',
+        });
+        if (l.origin_port && l.destination_port) {
+          const route = POPULAR_ROUTES.find(
+            r => r.origin === l.origin_port && r.dest === l.destination_port
+          );
+          if (route) setSelectedRoute(route.label);
+        }
+      })
+      .finally(() => setEditLoading(false));
+  }, [editId]);
 
   const steps = [
     { id: 1, label: 'Route', icon: MapPin },
@@ -60,8 +94,10 @@ export default function CreateListingPage() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/listings', {
-        method: 'POST',
+      const url = isEditMode ? `/api/listings/${editId}` : '/api/listings';
+      const method = isEditMode ? 'PATCH' : 'POST';
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           originPort: formData.originPort,
@@ -80,11 +116,11 @@ export default function CreateListingPage() {
 
       if (!res.ok) {
         const err = await res.json();
-        alert(err.error || 'Failed to create listing');
+        alert(err.error || 'Failed to save listing');
         return;
       }
 
-      alert('Container space listed! Fillers can now find and book your space.');
+      alert(isEditMode ? 'Listing updated!' : 'Container space listed! Fillers can now find and book your space.');
       router.push('/dashboard');
     } catch {
       alert('Something went wrong. Please try again.');
@@ -108,10 +144,10 @@ export default function CreateListingPage() {
                 </Button>
               </Link>
               <h1 className="text-2xl lg:text-3xl font-bold text-surface-900">
-                List Your Container Space
+                {isEditMode ? 'Edit Your Listing' : 'List Your Container Space'}
               </h1>
               <p className="text-surface-500 mt-1">
-                Fill in the details below to publish your available container space
+                {isEditMode ? 'Update your container listing details' : 'Fill in the details below to publish your available container space'}
               </p>
             </div>
 
@@ -138,6 +174,12 @@ export default function CreateListingPage() {
               ))}
             </div>
 
+            {editLoading ? (
+              <Card className="p-12 text-center">
+                <div className="animate-spin w-8 h-8 border-[3px] border-primary-500 border-t-transparent rounded-full mx-auto" />
+                <p className="text-surface-400 text-sm mt-4">Loading listing...</p>
+              </Card>
+            ) : (
             <Card className="p-6">
               {step === 1 && (
                 <div className="space-y-6 fade-in">
@@ -398,12 +440,13 @@ export default function CreateListingPage() {
                   <div className="flex justify-between">
                     <Button variant="secondary" onClick={() => setStep(3)}>Back</Button>
                     <Button onClick={handleSubmit} disabled={isSubmitting}>
-                      {isSubmitting ? 'Publishing...' : 'Publish Listing'}
+                      {isSubmitting ? 'Saving...' : isEditMode ? 'Update Listing' : 'Publish Listing'}
                     </Button>
                   </div>
                 </div>
               )}
             </Card>
+            )}
           </div>
         </main>
       </div>
