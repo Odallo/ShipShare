@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Check, ArrowRight, Ship, Search, DollarSign, Shield, Percent, Info } from 'lucide-react';
+import { Check, ArrowRight, Ship, Search, DollarSign, Percent } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';

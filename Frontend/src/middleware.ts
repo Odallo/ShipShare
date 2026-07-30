@@ -4,7 +4,6 @@ import type { NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isCreatePage = pathname === '/shipments/create';
   const isDetailPage = /^\/shipments\/(?!create$)[^/]+$/.test(pathname);
 
   if (isDetailPage) {

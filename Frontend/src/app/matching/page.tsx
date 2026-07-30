@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, ArrowRight, Ship, Calendar, DollarSign, Filter, Package, X, Users, Clock } from 'lucide-react';
+import { Search, ArrowRight, Ship, Filter, Package, Users } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -11,7 +11,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Modal } from '@/components/ui/Modal';
 import { useAuth } from '@/contexts/AuthContext';
-import { KNOWN_PORTS, CONTAINER_CBM, ContainerType } from '@/types';
+import { ContainerType } from '@/types';
 
 interface MockListing {
   id: string;

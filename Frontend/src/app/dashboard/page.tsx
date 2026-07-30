@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Ship, Package, DollarSign, Plus, MapPin, ArrowRight, Clock, Pencil,
-  LogOut, Search, TrendingUp, Container, BarChart3, Activity,
+  LogOut, Search, Container, BarChart3, Activity,
   Calendar, Users, ChevronRight, Eye, CheckCircle2, XCircle,
-  AlertCircle, Box, ArrowUpRight, ArrowDownRight, LayoutGrid,
-  List, RefreshCw
+  AlertCircle, ArrowUpRight, ArrowDownRight, LayoutGrid,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';

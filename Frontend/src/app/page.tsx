@@ -5,12 +5,11 @@ import Link from 'next/link';
 import { 
   ArrowRight, 
   Ship, 
-  Users, 
+  Zap,
   Shield, 
   Clock, 
   Banknote, 
   Star,
-  Zap,
   TrendingUp,
   CheckCircle2,
   Container,

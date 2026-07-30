@@ -87,20 +87,4 @@ export interface Booking {
   updatedAt?: string;
 }
 
-export interface Message {
-  id: string;
-  listingId: string;
-  senderId: string;
-  senderName: string;
-  content: string;
-  createdAt: string;
-}
 
-export interface DashboardStats {
-  totalListings: number;
-  activeListings: number;
-  totalBookings: number;
-  cbmSold: number;
-  totalEarned: number;
-  moneySaved: number;
-}

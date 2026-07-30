@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Ship, MapPin, Calendar, DollarSign, Package, ShieldCheck, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, Package, ShieldCheck, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -11,7 +11,6 @@ import { Modal } from '@/components/ui/Modal';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Navbar } from '@/components/layout/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
-import { ContainerListing, ContainerType } from '@/types';
 
 export default function ListingDetailPage() {
   const params = useParams();

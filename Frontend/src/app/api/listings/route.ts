@@ -46,7 +46,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ listings: data || [] });
+    const res = NextResponse.json({ listings: data || [] });
+    if (!shipperId) {
+      res.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+    }
+    return res;
   } catch (err) {
     return NextResponse.json(
       { error: 'Database unavailable. Please check your Supabase project is running.' },

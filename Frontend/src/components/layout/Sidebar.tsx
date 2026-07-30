@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { X, Ship, Search, Home, User, CreditCard, HelpCircle, LayoutDashboard } from 'lucide-react';
+import { X, Ship, Search, User, CreditCard, HelpCircle, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
